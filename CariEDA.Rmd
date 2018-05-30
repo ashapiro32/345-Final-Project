@@ -1,0 +1,13 @@
+---
+title: "CariEDA"
+author: "Cari Comnick"
+date: "May 29, 2018"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+ hawaii, alaska, delaware, maryland, connecticut, new hampshire, and Massachusetts
+ 
