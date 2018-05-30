@@ -5,3 +5,99 @@ date: "5/29/2018"
 output: html_document
 ---
 
+#filter out 2016/2017
+```{r}
+library(dplyr)
+bees <- read.csv("~/Desktop/Math345/345-Final-Project/vHoneyNeonic_v02.csv")
+
+bees <- bees %>% filter(year != 2016 & year!= 2017 & state != "HI")
+bees$year <- as.factor(bees$year)
+
+write.csv(bees, file = "bees.csv")
+```
+
+##num colonies by each pesticide
+```{r}
+library(ggplot2)
+
+ggplot(bees, aes(x=log(nCLOTHIANIDIN), y=log(numcol))) + geom_point(aes(color=year)) #not sure what to make of this
+
+ggplot(bees, aes(x=log(nIMIDACLOPRID), y=log(numcol))) + geom_point(aes(color=year)) #more defined neg cor, num of IMID increases by year
+
+ggplot(bees, aes(x=log(nTHIAMETHOXAM), y=log(numcol))) + geom_point(aes(color=year)) #slight  neg cor, num of THIA increases by year
+
+ggplot(bees, aes(x=log(nACETAMIPRID), y=log(numcol))) + geom_point(aes(color=year)) #slight neg cor, num of ACET increases by year, didn't really exist till later
+
+ggplot(bees, aes(x=log(nTHIACLOPRID), y=log(numcol))) + geom_point(aes(color=year)) #VERY slight neg cor, some clumps 
+
+ggplot(bees, aes(x=log(nAllNeonic), y=log(numcol))) + geom_point(aes(color=year)) #neg cor, striations by year 
+
+##SUGGESTS YEAR NEEDS RANDOM INT BUT NOT SLOPE??
+
+```
+
+##yield by each pesticide
+```{r}
+library(ggplot2)
+
+ggplot(bees, aes(x=log(nCLOTHIANIDIN), y=yieldpercol)) + geom_point(aes(color=year)) #neg cor
+
+ggplot(bees, aes(x=log(nIMIDACLOPRID), y=yieldpercol)) + geom_point(aes(color=year)) #VERY slight cor 
+
+ggplot(bees, aes(x=log(nTHIAMETHOXAM), y=yieldpercol)) + geom_point(aes(color=year)) #neg cor, clear striations by year
+
+ggplot(bees, aes(x=log(nACETAMIPRID), y=yieldpercol)) + geom_point(aes(color=year)) #slight neg cor
+
+ggplot(bees, aes(x=log(nTHIACLOPRID), y=yieldpercol)) + geom_point(aes(color=year)) #VERY slight neg cor, doesnt seem too frequently used
+
+ggplot(bees, aes(x=log(nAllNeonic), y=yieldpercol)) + geom_point(aes(color=year)) #slight neg cor, striations by year 
+
+##SUGGESTS YEAR NEEDS RANDOM INT BUT NOT SLOPE??
+
+```
+
+##price factors
+```{r}
+#STOCKS
+ggplot(bees, aes(x=log(numcol), y=log(stocks))) + geom_point(aes(color=year)) #clear pos cor
+
+ggplot(bees, aes(x=yieldpercol, y=log(stocks))) + geom_point(aes(color=year)) # pos cor, less clear
+
+ggplot(bees, aes(x=log(numcol), y=log(stocks))) + geom_point(aes(color=Region)) #south and northeast have fewer cols, stocks less in south 
+
+ggplot(bees, aes(x=yieldpercol, y=log(stocks))) + geom_point(aes(color=Region)) # stocks higher in W, lower in S
+
+#PRICE PER LB
+
+ggplot(bees, aes(x=log(numcol), y=priceperlb)) + geom_point(aes(color=year)) #strange shape, clear striations by year, expected relationship
+
+ggplot(bees, aes(x=yieldpercol, y=priceperlb)) + geom_point(aes(color=year)) # VERY SLIGHT neg cor, clear striations
+
+ggplot(bees, aes(x=log(numcol), y=priceperlb)) + geom_point(aes(color=Region)) #less clear trends, south has less cols? no strong relation between price and region seen here
+
+ggplot(bees, aes(x=yieldpercol, y=priceperlb)) + geom_point(aes(color=Region)) # no clear trends
+```
+
+#looking at region vars
+```{r}
+ggplot(bees, aes(x=Region, y=numcol)) + geom_boxplot() #lot of var in midwest, fair amount in west, NE has low number of cols
+
+ggplot(bees, aes(x=Region, y=yieldpercol)) + geom_boxplot() #Midwest and South have greater yield on avg
+
+ggplot(bees, aes(x=Region, y=totalprod)) + geom_boxplot() #more var in midwest
+
+ggplot(bees, aes(x=Region, y=priceperlb)) + geom_boxplot() #pretty even across region
+
+ggplot(bees, aes(x=Region, y=nAllNeonic)) + geom_boxplot() #midwest uses more and has large var
+
+ggplot(bees, aes(x=Region, y=nCLOTHIANIDIN)) + geom_boxplot() #midwest uses more and has large var
+
+ggplot(bees, aes(x=Region, y=nIMIDACLOPRID)) + geom_boxplot() #all but NE pretty even, west has high var
+
+ggplot(bees, aes(x=Region, y=nTHIAMETHOXAM)) + geom_boxplot() #MW large var, followed by S. very little in NE, W
+
+ggplot(bees, aes(x=Region, y=nACETAMIPRID)) + geom_boxplot() #low in all states, lots of var in W
+
+ggplot(bees, aes(x=Region, y=nTHIACLOPRID)) + geom_boxplot() #lots of var across all regions, esp. NE
+
+```
