@@ -11,9 +11,7 @@ library(dplyr)
 bees <- read.csv("~/Desktop/Math345/345-Final-Project/vHoneyNeonic_v02.csv")
 
 bees <- bees %>% filter(year != 2016 & year!= 2017 & state != "HI")
-bees$year <- as.factor(bees$year)
 
-write.csv(bees, file = "bees.csv")
 ```
 
 ```{r}
@@ -31,6 +29,9 @@ for (i in 1:727){
   if(bees$nTHIACLOPRID[i]==0){
     bees$nTHIACLOPRID[i] <- bees$nTHIACLOPRID[i] + 1}
 }
+
+bees$stocks <- bees$stocks/1000
+bees <- bees %>% mutate(yrsince1998 = year - 1998)
 
 write.csv(bees, file = "bees.csv")
 
@@ -122,20 +123,107 @@ ggplot(bees, aes(x=Region, y=nTHIACLOPRID)) + geom_boxplot() #lots of var across
 
 ```
 
+```{r}
+library(tidyr)
+bees_wide <- spread(bees, key=year, value=yieldpercol)
+ggplot(bees, aes(x = year, y = yieldpercol, color = state)) + geom_line() + theme(legend.position = "none") + stat_smooth(method = "loess", se = FALSE)
+```
+
 #MODELING
 ```{r}
 library(lme4)
 
-bees$stocks <- bees$stocks/1000
 
-lmer1 <- lmer(yieldpercol ~ (log(priceperlb) + log(nCLOTHIANIDIN) + log(nIMIDACLOPRID) + log(nTHIAMETHOXAM) + log(nACETAMIPRID) + log(nTHIACLOPRID))*log(stocks) + log(priceperlb):log(nCLOTHIANIDIN) + log(priceperlb):log(nTHIAMETHOXAM) + log(priceperlb):log(nACETAMIPRID)+ log(priceperlb):log(nTHIACLOPRID)+ log(nIMIDACLOPRID):log(nCLOTHIANIDIN) + log(nTHIAMETHOXAM):log(nIMIDACLOPRID) + log(nTHIAMETHOXAM):log(nACETAMIPRID) + log(nTHIACLOPRID):log(nCLOTHIANIDIN)+ log(nTHIACLOPRID):log(nIMIDACLOPRID) + log(nTHIACLOPRID):log(nTHIAMETHOXAM) + log(nTHIACLOPRID):log(nACETAMIPRID)+ (1|state) + (1|year), data=bees)
+#unconditional means
+uncondmean <- lmer(yieldpercol ~ 1 + (1|state), data = bees)
+summary(uncondmean) # 59.556 mean yield across all states across all years, 146.2 within state dev between individual yields and the state mean across all years, 200 between state dev
 
-lmer2 <- lmer(yieldpercol ~ log(priceperlb) + log(nTHIAMETHOXAM) + (log(nCLOTHIANIDIN) + log(nIMIDACLOPRID) +  log(nACETAMIPRID) + log(nTHIACLOPRID))*log(stocks) + log(priceperlb):log(nCLOTHIANIDIN) + log(priceperlb):log(nTHIAMETHOXAM) + log(priceperlb):log(nACETAMIPRID)+ log(priceperlb):log(nTHIACLOPRID)+ log(nIMIDACLOPRID):log(nCLOTHIANIDIN) + log(nTHIAMETHOXAM):log(nIMIDACLOPRID) + log(nTHIAMETHOXAM):log(nACETAMIPRID) + log(nTHIACLOPRID):log(nCLOTHIANIDIN)+ log(nTHIACLOPRID):log(nIMIDACLOPRID) + log(nTHIACLOPRID):log(nTHIAMETHOXAM) + log(nTHIACLOPRID):log(nACETAMIPRID)+ (1|state) + (1|year), data=bees)
+
+#unconditional growth
+uncondgrow <- lmer(yieldpercol ~ yrsince1998 + (yrsince1998|state), data = bees)
+summary(uncondgrow) #67.6229 mean yield in 1998, -0.974 mean yearly change in yield, 98.9023 var within state, 0.6787 var between states in rates of change in yield during the observation period, 314.0613 var btw states in 1998 
+
+uncondgrow2 <- lmer(yieldpercol ~ yrsince1998 + (1|state), data = bees)
+L1 <- logLik(uncondgrow)
+L0 <- logLik(uncondgrow2)
+D <- 2*(L1-L0)
+.5*(1-pchisq(D, 2)) + .5*(1-pchisq(D,1)) #do need random slope
+```
+
+
+```{r}
+lmer1 <- lmer(yieldpercol ~ yrsince1998 + (log(priceperlb) + log(nCLOTHIANIDIN) + log(nIMIDACLOPRID) + log(nTHIAMETHOXAM) + log(nACETAMIPRID) + log(nTHIACLOPRID))*log(stocks) + log(priceperlb):log(nCLOTHIANIDIN) + log(priceperlb):log(nTHIAMETHOXAM) + log(priceperlb):log(nACETAMIPRID)+ log(priceperlb):log(nTHIACLOPRID)+ log(nIMIDACLOPRID):log(nCLOTHIANIDIN) + log(nTHIAMETHOXAM):log(nIMIDACLOPRID) + log(nTHIAMETHOXAM):log(nACETAMIPRID) + log(nTHIACLOPRID):log(nCLOTHIANIDIN)+ log(nTHIACLOPRID):log(nIMIDACLOPRID) + log(nTHIACLOPRID):log(nTHIAMETHOXAM) + log(nTHIACLOPRID):log(nACETAMIPRID)+ (yrsince1998|state), data=bees)
+summary(lmer1)
+
+#take out unnecessary interactions
+lmer2 <- lmer(yieldpercol ~ yrsince1998 + log(nCLOTHIANIDIN) + log(nIMIDACLOPRID) + log(nACETAMIPRID) + log(nTHIAMETHOXAM) + (log(priceperlb) +log(nTHIACLOPRID))*log(stocks) + log(priceperlb)+  log(nIMIDACLOPRID):log(nCLOTHIANIDIN) + log(nTHIAMETHOXAM):log(nIMIDACLOPRID) + log(nTHIAMETHOXAM):log(nACETAMIPRID) + log(nTHIACLOPRID):log(nCLOTHIANIDIN)+ log(nTHIACLOPRID):log(nIMIDACLOPRID) + log(nTHIACLOPRID):log(nTHIAMETHOXAM) + log(nTHIACLOPRID):log(nACETAMIPRID)+ (yrsince1998|state), data=bees)
+
 
 lmer1.1 <- update(lmer1, REML=F)
 lmer2.1 <- update(lmer2, REML=F)
 
 D<-2*(logLik(lmer1.1) - logLik(lmer2.1))
-1-pchisq(D,2)
+1-pchisq(D,8) # p=0.468, prefer smaller
 
+
+lmer3 <- lmer(yieldpercol ~ yrsince1998 + log(nCLOTHIANIDIN) + log(nIMIDACLOPRID) + log(nACETAMIPRID) + log(nTHIAMETHOXAM) + log(nTHIACLOPRID) +log(priceperlb)*log(stocks) + log(priceperlb) + (yrsince1998|state), data=bees)
+lmer3.1 <- update(lmer3, REML=F)
+
+D<-2*(logLik(lmer2.1) - logLik(lmer3.1))
+1-pchisq(D,8) #p=0.6, prefer smaller
+
+summary(lmer3)
+
+lmer4 <- lmer(yieldpercol ~ yrsince1998  + log(nTHIAMETHOXAM)  +log(priceperlb)*log(stocks) + log(priceperlb) + (yrsince1998|state), data=bees)
+lmer4.1 <- update(lmer4, REML=F)
+anova(lmer3.1, lmer4.1) # p=0.26, prefer smaller
+
+summary(lmer4)
+
+lmer5 <- lmer(yieldpercol ~ yrsince1998 +log(priceperlb)*log(stocks) + log(priceperlb) + (yrsince1998|state), data=bees)
+lmer5.1 <- update(lmer5, REML=F)
+anova(lmer4.1, lmer3.1) # p=0.26, prefer smaller
+
+summary(lmer5)
+```
+
+
+#total colonies as Y value
+
+```{r}
+#unconditional means
+uncondmean2 <- lmer(log(numcol) ~ 1 + (1|state), data = bees)
+summary(uncondmean2) # 10.1515 log(?) mean yield across all states across all years, 0.04478 within state dev between individual yields and the state mean across all years, 1.61446 between state dev
+
+
+#unconditional growth
+uncondgrow <- lmer(log(numcol) ~ yrsince1998 + (yrsince1998|state), data = bees)
+summary(uncondgrow) #10.245020 mean yield in 1998, -0.014659 mean yearly change in yield, 0.021531 var within state, 0.001189 var between states in rates of change in yield during the observation period, 1.473287 var btw states in 1998 
+
+uncondgrow2 <- lmer(log(numcol) ~ yrsince1998 + (1|state), data = bees)
+L1 <- logLik(uncondgrow)
+L0 <- logLik(uncondgrow2)
+D <- 2*(L1-L0)
+.5*(1-pchisq(D, 2)) + .5*(1-pchisq(D,1)) #do need random slope
+```
+
+
+```{r}
+numcol1 <- lmer(log(numcol) ~ (yrsince1998 + log(totalprod) + log(stocks)+ log(priceperlb) + log(nCLOTHIANIDIN) + log(nIMIDACLOPRID) + log(nTHIAMETHOXAM)+ log(nACETAMIPRID)+ log(nTHIACLOPRID))^2 +(yrsince1998|state), data=bees)
+
+summary(numcol1)
+
+numcol2 <- lmer(log(numcol) ~ yrsince1998 + log(totalprod) + log(stocks)+ log(priceperlb) + log(nCLOTHIANIDIN) + log(nIMIDACLOPRID) + log(nTHIAMETHOXAM) + log(nACETAMIPRID) + log(nTHIACLOPRID) + yrsince1998:log(totalprod) + yrsince1998:log(stocks) + yrsince1998:log(priceperlb) + yrsince1998:log(nACETAMIPRID) + yrsince1998:log(nTHIACLOPRID) + log(totalprod):log(stocks) + log(totalprod):log(priceperlb) + log(totalprod):log(nCLOTHIANIDIN) + log(totalprod):log(nTHIAMETHOXAM) + log(totalprod):log(nACETAMIPRID) + log(totalprod):log(nTHIACLOPRID) + log(stocks):log(priceperlb) + log(stocks):log(nCLOTHIANIDIN) + log(stocks):log(nTHIAMETHOXAM) + log(stocks):log(nACETAMIPRID) + log(stocks):log(nTHIACLOPRID) + log(priceperlb):log(nACETAMIPRID) + log(priceperlb):log(nTHIACLOPRID) + (yrsince1998|state), data=bees)
+
+numcol1.1 <- update(numcol1, REML=F)
+numcol2.1 <- update(numcol2, REML=F)
+
+anova(numcol2.1, numcol1.1) #prefer smaller
+
+summary(numcol2)
+
+numcol3 <- lmer(log(numcol) ~ yrsince1998 + log(totalprod) + log(stocks)+ log(priceperlb) + log(nCLOTHIANIDIN) + log(nTHIAMETHOXAM) + log(nACETAMIPRID) + log(nTHIACLOPRID) + yrsince1998:log(totalprod) + yrsince1998:log(stocks) + yrsince1998:log(priceperlb) + yrsince1998:log(nACETAMIPRID) + yrsince1998:log(nTHIACLOPRID) + log(totalprod):log(stocks) + log(totalprod):log(priceperlb) + log(totalprod):log(nCLOTHIANIDIN) + log(totalprod):log(nTHIAMETHOXAM) + log(totalprod):log(nACETAMIPRID) + log(totalprod):log(nTHIACLOPRID) + log(stocks):log(priceperlb) + log(stocks):log(nCLOTHIANIDIN) + log(stocks):log(nTHIAMETHOXAM) + log(stocks):log(nACETAMIPRID) + log(stocks):log(nTHIACLOPRID) + log(priceperlb):log(nACETAMIPRID) + log(priceperlb):log(nTHIACLOPRID) + (yrsince1998|state), data=bees, REML = F)
+
+anova(numcol3, numcol2.1) #prefer smaller
+summary(numcol3)
 ```
