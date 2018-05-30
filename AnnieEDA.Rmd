@@ -16,6 +16,26 @@ bees$year <- as.factor(bees$year)
 write.csv(bees, file = "bees.csv")
 ```
 
+```{r}
+i <- numeric
+
+for (i in 1:727){
+  if(bees$nTHIAMETHOXAM[i]==0){
+    bees$nTHIAMETHOXAM[i] <- bees$nTHIAMETHOXAM[i] + 1}
+  if(bees$nCLOTHIANIDIN[i]==0){
+    bees$nCLOTHIANIDIN[i] <- bees$nCLOTHIANIDIN[i] + 1}
+  if(bees$nIMIDACLOPRID[i]==0){
+    bees$nIMIDACLOPRID[i] <- bees$nIMIDACLOPRID[i] + 1}
+  if(bees$nACETAMIPRID[i]==0){
+    bees$nACETAMIPRID[i] <- bees$nACETAMIPRID[i] + 1}
+  if(bees$nTHIACLOPRID[i]==0){
+    bees$nTHIACLOPRID[i] <- bees$nTHIACLOPRID[i] + 1}
+}
+
+write.csv(bees, file = "bees.csv")
+
+```
+
 ##num colonies by each pesticide
 ```{r}
 library(ggplot2)
@@ -99,5 +119,23 @@ ggplot(bees, aes(x=Region, y=nTHIAMETHOXAM)) + geom_boxplot() #MW large var, fol
 ggplot(bees, aes(x=Region, y=nACETAMIPRID)) + geom_boxplot() #low in all states, lots of var in W
 
 ggplot(bees, aes(x=Region, y=nTHIACLOPRID)) + geom_boxplot() #lots of var across all regions, esp. NE
+
+```
+
+#MODELING
+```{r}
+library(lme4)
+
+bees$stocks <- bees$stocks/1000
+
+lmer1 <- lmer(yieldpercol ~ (log(priceperlb) + log(nCLOTHIANIDIN) + log(nIMIDACLOPRID) + log(nTHIAMETHOXAM) + log(nACETAMIPRID) + log(nTHIACLOPRID))*log(stocks) + log(priceperlb):log(nCLOTHIANIDIN) + log(priceperlb):log(nTHIAMETHOXAM) + log(priceperlb):log(nACETAMIPRID)+ log(priceperlb):log(nTHIACLOPRID)+ log(nIMIDACLOPRID):log(nCLOTHIANIDIN) + log(nTHIAMETHOXAM):log(nIMIDACLOPRID) + log(nTHIAMETHOXAM):log(nACETAMIPRID) + log(nTHIACLOPRID):log(nCLOTHIANIDIN)+ log(nTHIACLOPRID):log(nIMIDACLOPRID) + log(nTHIACLOPRID):log(nTHIAMETHOXAM) + log(nTHIACLOPRID):log(nACETAMIPRID)+ (1|state) + (1|year), data=bees)
+
+lmer2 <- lmer(yieldpercol ~ log(priceperlb) + log(nTHIAMETHOXAM) + (log(nCLOTHIANIDIN) + log(nIMIDACLOPRID) +  log(nACETAMIPRID) + log(nTHIACLOPRID))*log(stocks) + log(priceperlb):log(nCLOTHIANIDIN) + log(priceperlb):log(nTHIAMETHOXAM) + log(priceperlb):log(nACETAMIPRID)+ log(priceperlb):log(nTHIACLOPRID)+ log(nIMIDACLOPRID):log(nCLOTHIANIDIN) + log(nTHIAMETHOXAM):log(nIMIDACLOPRID) + log(nTHIAMETHOXAM):log(nACETAMIPRID) + log(nTHIACLOPRID):log(nCLOTHIANIDIN)+ log(nTHIACLOPRID):log(nIMIDACLOPRID) + log(nTHIACLOPRID):log(nTHIAMETHOXAM) + log(nTHIACLOPRID):log(nACETAMIPRID)+ (1|state) + (1|year), data=bees)
+
+lmer1.1 <- update(lmer1, REML=F)
+lmer2.1 <- update(lmer2, REML=F)
+
+D<-2*(logLik(lmer1.1) - logLik(lmer2.1))
+1-pchisq(D,2)
 
 ```
