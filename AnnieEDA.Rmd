@@ -226,4 +226,51 @@ numcol3 <- lmer(log(numcol) ~ yrsince1998 + log(totalprod) + log(stocks)+ log(pr
 
 anova(numcol3, numcol2.1) #prefer smaller
 summary(numcol3)
+
+numcol3 <- lmer(log(numcol) ~ yrsince1998 + log(totalprod) + log(stocks)+ log(priceperlb) + log(nCLOTHIANIDIN) + log(nTHIAMETHOXAM) + log(nACETAMIPRID) + log(nTHIACLOPRID) + yrsince1998:log(totalprod) + yrsince1998:log(stocks) + yrsince1998:log(priceperlb) + yrsince1998:log(nACETAMIPRID) + yrsince1998:log(nTHIACLOPRID) + log(totalprod):log(stocks) + log(totalprod):log(priceperlb) + log(totalprod):log(nCLOTHIANIDIN) + log(totalprod):log(nTHIAMETHOXAM) + log(totalprod):log(nACETAMIPRID) + log(totalprod):log(nTHIACLOPRID) + log(stocks):log(priceperlb) + log(stocks):log(nCLOTHIANIDIN) + log(stocks):log(nTHIAMETHOXAM) + log(stocks):log(nACETAMIPRID) + log(stocks):log(nTHIACLOPRID) + log(priceperlb):log(nACETAMIPRID) + log(priceperlb):log(nTHIACLOPRID) + (yrsince1998|state), data=bees, REML = F)
+
+
+numcol4 <- lmer(log(numcol) ~ yrsince1998 + log(totalprod) + log(stocks)+ log(priceperlb) + log(nCLOTHIANIDIN)  + log(nACETAMIPRID) + log(nTHIACLOPRID) + yrsince1998:log(totalprod) + yrsince1998:log(stocks) + yrsince1998:log(priceperlb) + yrsince1998:log(nACETAMIPRID) + yrsince1998:log(nTHIACLOPRID) + log(totalprod):log(stocks) + log(totalprod):log(priceperlb) + log(totalprod):log(nCLOTHIANIDIN) + log(totalprod):log(nACETAMIPRID) + log(totalprod):log(nTHIACLOPRID) + log(stocks):log(priceperlb) + log(stocks):log(nCLOTHIANIDIN) + log(stocks):log(nACETAMIPRID) + log(stocks):log(nTHIACLOPRID) + log(priceperlb):log(nACETAMIPRID) + log(priceperlb):log(nTHIACLOPRID) + (yrsince1998|state), data=bees, REML = F)
+anova(numcol4, numcol3) #p=0.03
+
+
+numcol5 <- lmer(log(numcol) ~ yrsince1998 + log(totalprod) + log(stocks)+ log(priceperlb) + log(nCLOTHIANIDIN)  + log(nACETAMIPRID) + log(nTHIACLOPRID) +  yrsince1998:log(priceperlb) + yrsince1998:log(nACETAMIPRID) + yrsince1998:log(nTHIACLOPRID) + log(totalprod):log(stocks) + log(totalprod):log(priceperlb) + log(totalprod):log(nCLOTHIANIDIN) + log(totalprod):log(nACETAMIPRID) + log(totalprod):log(nTHIACLOPRID) + log(stocks):log(priceperlb) + log(stocks):log(nCLOTHIANIDIN) + log(stocks):log(nACETAMIPRID) + log(stocks):log(nTHIACLOPRID) + log(priceperlb):log(nACETAMIPRID) + log(priceperlb):log(nTHIACLOPRID) + (yrsince1998|state), data=bees, REML = F)
+
+anova(numcol5, numcol3) #p=0.002
+
+numcol6 <- lmer(log(numcol) ~ yrsince1998 + log(totalprod) + log(stocks)+ log(priceperlb) + log(nCLOTHIANIDIN)  + log(nACETAMIPRID) + log(nTHIACLOPRID) +  yrsince1998:log(priceperlb) + yrsince1998:log(nACETAMIPRID) + yrsince1998:log(nTHIACLOPRID) + log(totalprod):log(stocks) + log(totalprod):log(priceperlb) + log(totalprod):log(nCLOTHIANIDIN) + log(totalprod):log(nACETAMIPRID) + log(totalprod):log(nTHIACLOPRID) + log(stocks):log(priceperlb) + log(stocks):log(nCLOTHIANIDIN) + log(stocks):log(nACETAMIPRID) + log(stocks):log(nTHIACLOPRID) + log(priceperlb):log(nACETAMIPRID) + log(priceperlb):log(nTHIACLOPRID) + (yrsince1998|state), data=bees, REML = F)
+
+
+
+```
+
+##DIAGNOSTICS MODEL 3
+```{r}
+library(HLMdiag)
+
+conditionalResids<-HLMresid(numcol3, level = 1, standardize = T)
+plot(fitted(numcol3), conditionalResids)
+abline(h=0)
+#not constant var
+
+
+#b
+marginalResids <- HLMresid(lmer3, level = "marginal", standardize = T)
+plot(fitted(lmer3), marginalResids) # outliers
+which(marginalResids < -2) #all but 1 low levels of nTHIAC
+
+#c
+cd <- cooks.distance(lmer5)
+plot(cd, type= "h")
+
+dotplot_diag(cd, cutoff = "internal", name = "cooks.distance")
+which(cd > 0.02)
+bees[c(545, 546, 553, 556), ] #SD and SC 2001 2002 only used 2 pesticides
+
+#d
+lev <- leverage(lmer.6, level=1)
+
+dotplot_diag(lev[,1], cutoff = "internal", name = "leverage")
+
+
 ```
