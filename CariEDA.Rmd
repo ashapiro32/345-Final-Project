@@ -188,72 +188,100 @@ anova(bees.lmer6.1,bees.lmer7.1) #prefer this model, now all t values two
 hist(log(bees$totalprod)) #looks okay
 
 #unconditional means
-bees2.lmer <- lmer(log(totalprod) ~ 1 + (1|state), data = bees)
+bees2.lmer <- lmer(log(totalprod2) ~ 1 + (1|state), data = bees)
 summary(bees2.lmer)
 
 #unconditional growth
-bees2.lmer2 <- lmer(log(totalprod) ~ yrsince1998 + (1|state), data = bees)
+bees2.lmer2 <- lmer(log(totalprod2) ~ yrsince1998 + (1|state), data = bees)
+summary(bees2.lmer2)
+
+#do we need random slope
+bees2.lmer2 <- lmer(log(totalprod2) ~ yrsince1998 + (yrsince1998|state), data = bees)
+bees2.lmer2b <- lmer(log(totalprod2) ~ yrsince1998 + (1|state), data = bees)
+L1 <- logLik(bees2.lmer2)
+L0 <- logLik(bees2.lmer2b)
+D <- 2*(L1-L0)
+.5*(1-pchisq(D, 2)) + .5*(1-pchisq(D,1)) #we do need the random slope
+
 summary(bees2.lmer2)
 ```
 
 ```{r}
-hist(bees$prodvalue)
+hist(bees$totalprod)
+bees$totalprod2 <- bees$totalprod/10000 #scale to be smaller
+hist(log(bees$totalprod2))
+
 #build a model with log(totalprod) as response
-bees2.lmer3 <- lmer(log(totalprod) ~ (log(numcol) + log(stocks) + log(priceperlb) + log(prodvalue) + yrsince1998 + log(nCLOTHIANIDIN) + log(nIMIDACLOPRID) + log(nTHIAMETHOXAM) + log(nACETAMIPRID) + log(nTHIACLOPRID) + log(nAllNeonic))^2 + (yrsince1998|state), data = bees)
+bees2.lmer3 <- lmer(log(totalprod2) ~ (log(numcol) + log(stocks) + log(priceperlb) + yrsince1998 + log(nCLOTHIANIDIN) + log(nIMIDACLOPRID) + log(nTHIAMETHOXAM) + log(nACETAMIPRID) + log(nTHIACLOPRID) + log(nAllNeonic))^2 + (yrsince1998|state), data = bees)
 summary(bees2.lmer3, cor = FALSE)
 
-bees2.lmer4 <- update(bees2.lmer3, . ~ . -(log(numcol):log(stocks) + log(numcol):log(priceperlb) + log(numcol):yrsince1998+log(numcol):log(nCLOTHIANIDIN)+log(numcol):log(nIMIDACLOPRID)+log(numcol):log(nTHIAMETHOXAM)+log(numcol):log(nACETAMIPRID)+log(numcol):log(nAllNeonic)+log(stocks):log(priceperlb)+log(stocks):yrsince1998+log(stocks):log(nCLOTHIANIDIN)+log(stocks):log(nIMIDACLOPRID)+log(stocks):log(nTHIAMETHOXAM)+log(stocks):log(nACETAMIPRID)+log(stocks):log(nAllNeonic)+log(priceperlb):log(prodvalue)+log(priceperlb):yrsince1998+log(priceperlb):log(nIMIDACLOPRID)+log(priceperlb):log(nTHIAMETHOXAM)+log(priceperlb):log(nACETAMIPRID)+log(priceperlb):log(nTHIACLOPRID)+log(priceperlb):log(nAllNeonic)))
+bees2.lmer4 <- update(bees2.lmer3, . ~ . -(log(numcol):log(priceperlb)+log(numcol):log(nIMIDACLOPRID)+log(numcol):log(nTHIAMETHOXAM)+log(numcol):log(nTHIACLOPRID)+log(numcol):log(nTHIACLOPRID)+log(numcol):log(nAllNeonic)+log(stocks):log(priceperlb)+log(stocks):log(nIMIDACLOPRID)+log(stocks):log(nAllNeonic)+log(priceperlb):yrsince1998+log(priceperlb):log(nCLOTHIANIDIN)+log(priceperlb):log(nIMIDACLOPRID)+log(priceperlb):log(nTHIAMETHOXAM)+log(priceperlb):log(nTHIACLOPRID)+log(priceperlb):log(nAllNeonic)+yrsince1998:log(nCLOTHIANIDIN)+yrsince1998:log(nTHIAMETHOXAM)+yrsince1998:log(nTHIACLOPRID)+log(nCLOTHIANIDIN):log(nACETAMIPRID)+log(nCLOTHIANIDIN):log(nTHIACLOPRID)+log(nCLOTHIANIDIN):log(nAllNeonic) +log(nIMIDACLOPRID):log(nTHIAMETHOXAM)+log(nIMIDACLOPRID):log(nTHIACLOPRID)+log(nTHIAMETHOXAM):log(nACETAMIPRID)+log(nTHIAMETHOXAM):log(nAllNeonic)+log(nACETAMIPRID):log(nTHIACLOPRID)+log(nACETAMIPRID):log(nAllNeonic)))
+
 summary(bees2.lmer4, cor = FALSE)
 
 bees2.lmer3.1 <- update(bees2.lmer3, REML=FALSE)
 bees2.lmer4.1 <- update(bees2.lmer4, REML=FALSE)
 anova(bees2.lmer3.1,bees2.lmer4.1) #prefer smaller model
 
-bees2.lmer5 <- update(bees2.lmer4, . ~ . -(log(priceperlb):log(nCLOTHIANIDIN)+log(prodvalue):log(nCLOTHIANIDIN)+log(prodvalue):log(nIMIDACLOPRID)+log(prodvalue):log(nTHIAMETHOXAM)+log(prodvalue):log(nTHIACLOPRID)+log(prodvalue):log(nAllNeonic)+yrsince1998:log(nCLOTHIANIDIN)+yrsince1998:log(nACETAMIPRID)+log(nCLOTHIANIDIN):log(nACETAMIPRID)+log(nCLOTHIANIDIN):log(nTHIACLOPRID)+log(nIMIDACLOPRID):log(nTHIACLOPRID)+log(nTHIAMETHOXAM):log(nACETAMIPRID)+log(nTHIAMETHOXAM):log(nTHIACLOPRID)+log(nACETAMIPRID):log(nAllNeonic)+log(nTHIACLOPRID):log(nAllNeonic)))
+bees2.lmer5 <- update(bees2.lmer4, . ~ . -(log(numcol):log(nACETAMIPRID)+log(nCLOTHIANIDIN):log(nTHIAMETHOXAM)+log(nTHIAMETHOXAM):log(nTHIACLOPRID)+log(nTHIACLOPRID):log(nAllNeonic)))
 summary(bees2.lmer5, cor = FALSE)
 
 bees2.lmer5.1 <- update(bees2.lmer5, REML=FALSE)
 anova(bees2.lmer4.1,bees2.lmer5.1) #prefer smaller model
 
-bees2.lmer6 <- update(bees2.lmer5, . ~ . -(log(prodvalue):yrsince1998+yrsince1998:log(nIMIDACLOPRID)+yrsince1998:log(nTHIAMETHOXAM)+yrsince1998:log(nAllNeonic)+log(nCLOTHIANIDIN):log(nTHIAMETHOXAM)+log(nTHIAMETHOXAM):log(nAllNeonic)+log(nACETAMIPRID):log(nTHIACLOPRID)))
+bees2.lmer6 <- update(bees2.lmer5, . ~ . -(log(stocks):log(nTHIAMETHOXAM)+log(stocks):log(nACETAMIPRID)+log(stocks):log(nTHIACLOPRID)+yrsince1998:log(nACETAMIPRID)+yrsince1998:log(nAllNeonic)+log(nIMIDACLOPRID):log(nAllNeonic)))
 summary(bees2.lmer6, cor = FALSE)
 
 bees2.lmer6.1 <- update(bees2.lmer6, REML=FALSE)
 anova(bees2.lmer5.1,bees2.lmer6.1) #prefer smaller model
 
-bees2.lmer7 <- update(bees2.lmer6,. ~ . -(log(prodvalue):log(nACETAMIPRID)+yrsince1998:log(nTHIACLOPRID)+log(nCLOTHIANIDIN):log(nIMIDACLOPRID)+log(nCLOTHIANIDIN):log(nAllNeonic)))
+bees2.lmer7 <- update(bees2.lmer6,. ~ . -(yrsince1998:log(nIMIDACLOPRID)))
 summary(bees2.lmer7, cor = FALSE)
 
 bees2.lmer7.1 <- update(bees2.lmer7, REML=FALSE)
 anova(bees2.lmer6.1,bees2.lmer7.1) #prefer smaller model
 
 #start taking out non-interaction terms
-bees2.lmer8 <- update(bees2.lmer7,. ~ . -(log(nCLOTHIANIDIN) + yrsince1998))
+bees2.lmer8 <- update(bees2.lmer7,. ~ . -(log(nAllNeonic) + log(nTHIAMETHOXAM) + log(nTHIACLOPRID)))
 summary(bees2.lmer8, cor = FALSE)
 
 bees2.lmer8.1 <- update(bees2.lmer8, REML=FALSE)
 anova(bees2.lmer7.1,bees2.lmer8.1) #prefer smaller model
 
-#now all have t>2 but still need to take some out?
-bees2.lmer9 <- update(bees2.lmer8,. ~ . -(log(numcol):log(nTHIACLOPRID) + log(stocks):log(nTHIACLOPRID) + log(nIMIDACLOPRID):log(nACETAMIPRID)))
-summary(bees2.lmer9, cor = FALSE)
+bees.lmerFINAL <- bees2.lmer8
+```
 
-bees2.lmer9.1 <- update(bees2.lmer9, REML=FALSE)
-anova(bees2.lmer8.1,bees2.lmer9.1) #prefer smaller model
+```{r}
+predictions <- predict(bees.lmerFINAL, type="response")
+bees$predict <- exp(predictions) #pretty okay
+```
 
-#FINAL MODEL
-bees2.lmer10 <- update(bees2.lmer9,. ~ . -(log(nTHIACLOPRID) + log(nACETAMIPRID)))
-summary(bees2.lmer10, cor = FALSE)
+```{r}
+library(HLMdiag)
 
-bees2.lmer10.1 <- update(bees2.lmer10, REML=FALSE)
-anova(bees2.lmer9.1,bees2.lmer10.1) #prefer smaller model
+conditionalResids<-HLMresid(bees.lmerFINAL, level = 1, standardize = T)
+plot(fitted(bees.lmerFINAL), conditionalResids)
+abline(h=0)
+#pretty constant variance
 
 
-bees2.lmer11 <- update(bees2.lmer10,. ~ . -(log(nIMIDACLOPRID):log(nAllNeonic)))
-summary(bees2.lmer11, cor = FALSE)
+#b
+marginalResids <- HLMresid(bees.lmerFINAL, level = "marginal", standardize = T)
+plot(fitted(bees.lmerFINAL), marginalResids) #not really any outliers
+bees[which(marginalResids < -3),] #looked at smallest ones, seems like they have a lot of values of 1 for different chemicals, overpredicted
+bees[which(marginalResids > 3),] #looked at smallest ones, seems like they have a lot of values of 1 thiac, underpredicted
 
-bees2.lmer11.1 <- update(bees2.lmer11, REML=FALSE)
-anova(bees2.lmer10.1,bees2.lmer11.1) #prefer larger model
+#c
+cd <- cooks.distance(bees.lmerFINAL)
+plot(cd, type= "h")
+
+dotplot_diag(cd, cutoff = "internal", name = "cooks.distance")
+bees[which(cd > 0.02),]
+
+#d
+lev <- leverage(lmer.6, level=1)
+
+dotplot_diag(lev[,1], cutoff = "internal", name = "leverage")
 ```
 
  
