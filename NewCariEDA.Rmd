@@ -365,7 +365,7 @@ summary(bees.lmerFINAL2)
 State i, year j
 \begin{align*}
 Level 1:
-\log(TotalProduction_{ij}) = a_i + b_iyrsince1998_{ij} + \gamma \log(numcol)_{ij} + log(stocks) + log(priceperlb) + log(nCLOTHIANIDIN) + log(nACETAMIPRID) + log(numcol):log(stocks) + log(numcol):yrsince1998 + log(numcol):log(nCLOTHIANIDIN) + log(stocks):yrsince1998 + log(stocks):log(nCLOTHIANIDIN) + log(priceperlb):log(nACETAMIPRID) + \epsilon_{ij}
+\log(TotalProduction_{ij}) = a_i + b_iyrsince1998_{ij} + \gamma \log(numcol)_{ij} + \delta\log(stocks) + \zeta\log(priceperlb) + \eta\log(nCLOTHIANIDIN) + \theta\log(nACETAMIPRID) + \iota\log(numcol):log(stocks) + \kappa\log(numcol):yrsince1998 + \lambda\log(numcol):log(nCLOTHIANIDIN) + \nu\log(stocks):yrsince1998 + \xi\log(stocks):log(nCLOTHIANIDIN) + \omicron\log(priceperlb):log(nACETAMIPRID) + \epsilon_{ij}
 
 Level 2:
 a_i = \alpha + u_i (random int)
