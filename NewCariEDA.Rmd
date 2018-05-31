@@ -1,0 +1,375 @@
+---
+title: "CariEDA"
+author: "Cari Comnick"
+date: "May 29, 2018"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(ggplot2)
+library(lme4)
+```
+
+States that aren't in data: hawaii (we took out), alaska, delaware, maryland, connecticut, new hampshire, and Massachusetts.
+
+```{r}
+setwd("~/Desktop/Advanced Statistical Modeling/Final Project")
+bees <- read.csv("bees.csv") #new data without hawaii
+bees$nCLOTHIANIDIN <- as.numeric(bees$nCLOTHIANIDIN)
+bees$nIMIDACLOPRID <- as.numeric(bees$nIMIDACLOPRID)
+bees$nTHIAMETHOXAM <- as.numeric(bees$nTHIAMETHOXAM)
+bees$nACETAMIPRID <- as.numeric(bees$nACETAMIPRID)
+bees$nTHIACLOPRID <- as.numeric(bees$nTHIACLOPRID)
+bees$nAllNeonic <- as.numeric(bees$nAllNeonic)
+```
+
+```{r}
+#take logs of most
+hist(bees$stocks)
+hist(bees$priceperlb)
+hist(bees$yieldpercol) #fine
+hist(bees$nCLOTHIANIDIN)
+hist(bees$nIMIDACLOPRID)
+range(log(bees$nIMIDACLOPRID))
+hist(bees$nTHIAMETHOXAM)
+range(log(bees$nTHIAMETHOXAM))
+hist(bees$nACETAMIPRID)
+range(log(bees$nACETAMIPRID))
+hist(bees$nTHIACLOPRID)
+range(log(bees$nTHIACLOPRID))
+hist(bees$nAllNeonic)
+```
+
+```{r}
+#interactions with price per lb
+colnames(bees)
+bees$priceperlbFACTOR <- cut_number(bees$priceperlb, 3)
+p <- ggplot(bees)
+
+p + geom_point(aes(x=log(nCLOTHIANIDIN),y=yieldpercol, color = priceperlbFACTOR))+geom_smooth(aes(x=log(nCLOTHIANIDIN),y=yieldpercol, color = priceperlbFACTOR), method = "nls", formula = y ~ a * x + b, se = FALSE, method.args = list(start = list(a = 0.1, b = 0.1))) #since the lines aren't parallel, suggests interaction between price per lb and nCLOTHIANIDIN
+
+p + geom_point(aes(x=log(nIMIDACLOPRID),y=yieldpercol, color = priceperlbFACTOR))+geom_smooth(aes(x=log(nIMIDACLOPRID),y=yieldpercol, color = priceperlbFACTOR), method = "nls", formula = y ~ a * x + b, se = FALSE, method.args = list(start = list(a = 0.1, b = 0.1))) #parallel, so no interaction between pplb and nimidacloprid
+
+p + geom_point(aes(x=log(nTHIAMETHOXAM),y=yieldpercol, color = priceperlbFACTOR))+geom_smooth(aes(x=log(nTHIAMETHOXAM),y=yieldpercol, color = priceperlbFACTOR), method = "nls", formula = y ~ a * x + b, se = FALSE, method.args = list(start = list(a = 0.1, b = 0.1))) #maybe interaction between pplb and nTHIAMETHOXAM
+
+p + geom_point(aes(x=log(nACETAMIPRID),y=yieldpercol, color = priceperlbFACTOR))+geom_smooth(aes(x=log(nACETAMIPRID),y=yieldpercol, color = priceperlbFACTOR), method = "nls", formula = y ~ a * x + b, se = FALSE, method.args = list(start = list(a = 0.1, b = 0.1))) #interaction between pplb and nACETAMIPRID
+
+p + geom_point(aes(x=log(nTHIACLOPRID),y=yieldpercol, color = priceperlbFACTOR))+geom_smooth(aes(x=log(nTHIACLOPRID),y=yieldpercol, color = priceperlbFACTOR), method = "nls", formula = y ~ a * x + b, se = FALSE, method.args = list(start = list(a = 0.1, b = 0.1))) #definitely interaction between pplb and nTHIACLOPRID (? seems like the lots of very small values are really skewing it)
+
+p + geom_point(aes(x=log(nAllNeonic),y=yieldpercol, color = priceperlbFACTOR))+geom_smooth(aes(x=log(nAllNeonic),y=yieldpercol, color = priceperlbFACTOR), method = "nls", formula = y ~ a * x + b, se = FALSE, method.args = list(start = list(a = 0.1, b = 0.1))) #maybe interaction
+```
+
+```{r}
+#check to see if on the right track
+model1 <- glm(yieldpercol ~ priceperlb * (1 + nCLOTHIANIDIN + nIMIDACLOPRID + nTHIAMETHOXAM + nACETAMIPRID + nTHIACLOPRID), data = bees, family = "poisson")
+summary(model1) #whaaaaat they match up!
+
+model2 <- glm(yieldpercol ~ priceperlb * nAllNeonic, data = bees, family = "poisson")
+summary(model2)
+```
+
+```{r}
+#interactions among chemicals
+bees$nCLOTHIANIDINFACTOR <- cut_number(bees$nCLOTHIANIDIN, 2)
+bees$nIMIDACLOPRIDFACTOR <- cut_number(bees$nIMIDACLOPRID, 3)
+bees$nTHIAMETHOXAMFACTOR <- cut_number(bees$nTHIAMETHOXAM, 3)
+bees$nACETAMIPRIDFACTOR <- cut_number(bees$nACETAMIPRID, 2)
+bees$nTHIACLOPRIDFACTOR <- cut_number(bees$nTHIACLOPRID, 2) #won't work
+
+q <- ggplot(bees)
+
+#nclothiandin
+q + geom_point(aes(x=log(nCLOTHIANIDIN),y=yieldpercol, color = nIMIDACLOPRIDFACTOR))+geom_smooth(aes(x=log(nCLOTHIANIDIN),y=yieldpercol, color = nIMIDACLOPRIDFACTOR), method = "nls", formula = y ~ a * x + b, se = FALSE, method.args = list(start = list(a = 0.1, b = 0.1))) #interaction between nIMIDACLOPRID and nCLOTHIANIDIN
+
+q + geom_point(aes(x=log(nCLOTHIANIDIN),y=yieldpercol, color = nTHIAMETHOXAMFACTOR))+geom_smooth(aes(x=log(nCLOTHIANIDIN),y=yieldpercol, color = nTHIAMETHOXAMFACTOR), method = "nls", formula = y ~ a * x + b, se = FALSE, method.args = list(start = list(a = 0.1, b = 0.1))) #interaction between nTHIAMETHOXAM and nCLOTHIANIDIN
+
+q + geom_point(aes(x=log(nCLOTHIANIDIN),y=yieldpercol, color = nACETAMIPRIDFACTOR))+geom_smooth(aes(x=log(nCLOTHIANIDIN),y=yieldpercol, color = nACETAMIPRIDFACTOR), method = "nls", formula = y ~ a * x + b, se = FALSE, method.args = list(start = list(a = 0.1, b = 0.1))) #no interaction between nACETAMIPRID and nCLOTHIANIDIN
+
+#imodacloprid
+q + geom_point(aes(x=log(nIMIDACLOPRID),y=yieldpercol, color = nTHIAMETHOXAMFACTOR))+geom_smooth(aes(x=log(nIMIDACLOPRID),y=yieldpercol, color = nTHIAMETHOXAMFACTOR), method = "nls", formula = y ~ a * x + b, se = FALSE, method.args = list(start = list(a = 0.1, b = 0.1))) #interaction between nIMIDACLOPRID and nTHIAMETHOXAM
+
+q + geom_point(aes(x=log(nIMIDACLOPRID),y=yieldpercol, color = nACETAMIPRIDFACTOR))+geom_smooth(aes(x=log(nIMIDACLOPRID),y=yieldpercol, color = nACETAMIPRIDFACTOR), method = "nls", formula = y ~ a * x + b, se = FALSE, method.args = list(start = list(a = 0.1, b = 0.1))) #doesn't seem to be interaction between nIMIDACLOPRID and nACETAMIPRID
+
+#nTHIAMETHOXAM
+q + geom_point(aes(x=log(nTHIAMETHOXAM),y=yieldpercol, color = nACETAMIPRIDFACTOR))+geom_smooth(aes(x=log(nTHIAMETHOXAM),y=yieldpercol, color = nACETAMIPRIDFACTOR), method = "nls", formula = y ~ a * x + b, se = FALSE, method.args = list(start = list(a = 0.1, b = 0.1))) #interaction between nTHIAMETHOXAM and nACETAMIPRID
+
+#nTHIACLOPRID
+q + geom_point(aes(x=log(nTHIACLOPRID),y=yieldpercol, color = nCLOTHIANIDINFACTOR))+geom_smooth(aes(x=log(nTHIACLOPRID),y=yieldpercol, color = nCLOTHIANIDINFACTOR), method = "nls", formula = y ~ a * x + b, se = FALSE, method.args = list(start = list(a = 0.1, b = 0.1))) #interaction between nTHIACLOPRID and nCLOTHIANIDIN
+
+q + geom_point(aes(x=log(nTHIACLOPRID),y=yieldpercol, color = nIMIDACLOPRIDFACTOR))+geom_smooth(aes(x=log(nTHIACLOPRID),y=yieldpercol, color = nIMIDACLOPRIDFACTOR), method = "nls", formula = y ~ a * x + b, se = FALSE, method.args = list(start = list(a = 0.1, b = 0.1))) #maybe interaction between nTHIACLOPRID and nIMIDACLOPRID
+
+q + geom_point(aes(x=log(nTHIACLOPRID),y=yieldpercol, color = nTHIAMETHOXAMFACTOR))+geom_smooth(aes(x=log(nTHIACLOPRID),y=yieldpercol, color = nTHIAMETHOXAMFACTOR), method = "nls", formula = y ~ a * x + b, se = FALSE, method.args = list(start = list(a = 0.1, b = 0.1))) #interaction between nTHIACLOPRID and nTHIAMETHOXAM
+
+q + geom_point(aes(x=log(nTHIACLOPRID),y=yieldpercol, color = nACETAMIPRIDFACTOR))+geom_smooth(aes(x=log(nTHIACLOPRID),y=yieldpercol, color = nACETAMIPRIDFACTOR), method = "nls", formula = y ~ a * x + b, se = FALSE, method.args = list(start = list(a = 0.1, b = 0.1))) #interaction between nTHIACLOPRID and nACETAMIPRID, but the 0s are very much changing this one
+
+model3 <- glm(yieldpercol ~ (nCLOTHIANIDIN + nIMIDACLOPRID + nTHIAMETHOXAM + nACETAMIPRID + nTHIACLOPRID)^2, data = bees, family = "poisson")
+summary(model3) 
+#all sig except nCLOTHIANIDIN:nTHIAMETHOXAM, nIMIDACLOPRID:nACETAMIPRID, and nTHIAMETHOXAM:nTHIACLOPRID, kinda matches
+```
+
+```{r}
+#interactions between stocks and everything
+bees$stocksFACTOR <- cut_number(bees$stocks, 3)
+r <- ggplot(bees)
+
+r + geom_point(aes(x=log(stocks),y=yieldpercol, color = nIMIDACLOPRIDFACTOR))+geom_smooth(aes(x=log(stocks),y=yieldpercol, color = nIMIDACLOPRIDFACTOR), method = "nls", formula = y ~ a * x + b, se = FALSE, method.args = list(start = list(a = 0.1, b = 0.1))) #interaction between stocks and nCLOTHIANIDIN
+
+r + geom_point(aes(x=log(stocks),y=yieldpercol, color = nIMIDACLOPRIDFACTOR))+geom_smooth(aes(x=log(stocks),y=yieldpercol, color = nIMIDACLOPRIDFACTOR), method = "nls", formula = y ~ a * x + b, se = FALSE, method.args = list(start = list(a = 0.1, b = 0.1))) #interaction between stocks and nIMIDACLOPRID
+
+r + geom_point(aes(x=log(stocks),y=yieldpercol, color = nTHIAMETHOXAMFACTOR))+geom_smooth(aes(x=log(stocks),y=yieldpercol, color = nTHIAMETHOXAMFACTOR), method = "nls", formula = y ~ a * x + b, se = FALSE, method.args = list(start = list(a = 0.1, b = 0.1))) #interaction between stocks and nTHIAMETHOXAM
+
+r + geom_point(aes(x=log(stocks),y=yieldpercol, color = nACETAMIPRIDFACTOR))+geom_smooth(aes(x=log(stocks),y=yieldpercol, color = nACETAMIPRIDFACTOR), method = "nls", formula = y ~ a * x + b, se = FALSE, method.args = list(start = list(a = 0.1, b = 0.1))) #interaction between stocks and nACETAMIPRID
+
+r + geom_point(aes(x=log(nTHIACLOPRID),y=yieldpercol, color = stocksFACTOR))+geom_smooth(aes(x=log(nTHIACLOPRID),y=yieldpercol, color = stocksFACTOR), method = "nls", formula = y ~ a * x + b, se = FALSE, method.args = list(start = list(a = 0.1, b = 0.1))) #interaction between stocks and nTHIACLOPRID (maybe, zeros seem to be weird)
+
+r + geom_point(aes(x=log(stocks),y=yieldpercol, color = priceperlbFACTOR))+geom_smooth(aes(x=log(stocks),y=yieldpercol, color = priceperlbFACTOR), method = "nls", formula = y ~ a * x + b, se = FALSE, method.args = list(start = list(a = 0.1, b = 0.1))) #interaction between stocks and and price per lb
+```
+
+```{r}
+#do we need a random slope as well? looks like it
+bees$year <- as.numeric(bees$year)
+p2 <- ggplot(bees, aes(x = year, y = yieldpercol, color = state))
+p2+ #geom_line() + 
+  theme(legend.position = "none") + stat_smooth(method = "lm", se = FALSE)
+p2+ geom_line()
+p2+theme(legend.position = "none") + stat_smooth(method = "loess", se = FALSE)
+```
+
+```{r}
+#unconditional means
+bees.lmer <- lmer(yieldpercol ~ 1 + (1|state), data = bees)
+summary(bees.lmer)
+
+#unconditional growth
+bees.lmer2 <- lmer(yieldpercol ~ yrsince1998 + (1|state), data = bees)
+summary(bees.lmer2)
+```
+
+```{r}
+#build a model
+bees.lmer3 <- lmer(yieldpercol ~ yrsince1998 + (log(priceperlb) + log(nCLOTHIANIDIN) + log(nIMIDACLOPRID) + log(nTHIAMETHOXAM) + log(nACETAMIPRID) + log(nTHIACLOPRID))*log(stocks) + log(priceperlb):log(nCLOTHIANIDIN) + log(priceperlb):log(nTHIAMETHOXAM) + log(priceperlb):log(nACETAMIPRID)+ log(priceperlb):log(nTHIACLOPRID)+ log(nIMIDACLOPRID):log(nCLOTHIANIDIN) + log(nTHIAMETHOXAM):log(nIMIDACLOPRID) + log(nTHIAMETHOXAM):log(nACETAMIPRID) + log(nTHIACLOPRID):log(nCLOTHIANIDIN)+ log(nTHIACLOPRID):log(nIMIDACLOPRID) + log(nTHIACLOPRID):log(nTHIAMETHOXAM) + log(nTHIACLOPRID):log(nACETAMIPRID)+ (yrsince1998|state), data=bees)
+summary(bees.lmer3, cor=FALSE)
+
+bees.lmer4 <- lmer(yieldpercol ~ yrsince1998 + log(nIMIDACLOPRID) + log(nACETAMIPRID) + (log(priceperlb) + log(nCLOTHIANIDIN) + log(nTHIAMETHOXAM) + log(nTHIACLOPRID))*log(stocks) + log(nTHIAMETHOXAM):log(nACETAMIPRID) + log(nTHIACLOPRID):log(nCLOTHIANIDIN)+ log(nTHIACLOPRID):log(nACETAMIPRID)+ (yrsince1998|state), data=bees)
+summary(bees.lmer4)
+
+bees.lmer3.1 <- update(bees.lmer3, REML=F)
+bees.lmer4.1 <- update(bees.lmer4, REML=F)
+
+D<-2*(logLik(bees.lmer3.1) - logLik(bees.lmer4.1))
+1-pchisq(D,10)
+
+anova(bees.lmer3.1,bees.lmer4.1) #check, prefer smaller model
+
+bees.lmer5 <- lmer(yieldpercol ~ yrsince1998 + log(nIMIDACLOPRID) + log(nACETAMIPRID) + log(nCLOTHIANIDIN) + log(nTHIACLOPRID) + (log(priceperlb) + log(nTHIAMETHOXAM))*log(stocks) + log(nTHIACLOPRID):log(nCLOTHIANIDIN)+ (yrsince1998|state), data=bees)
+summary(bees.lmer5, cor=FALSE)
+bees.lmer5.1 <- update(bees.lmer5, REML=F)
+
+anova(bees.lmer4.1,bees.lmer5.1)  #prefer smaller model
+
+bees.lmer6 <- lmer(yieldpercol ~ yrsince1998 + log(nIMIDACLOPRID) + log(nTHIAMETHOXAM)  + log(priceperlb)*log(stocks) + (yrsince1998|state), data=bees)
+summary(bees.lmer6, cor=FALSE)
+bees.lmer6.1 <- update(bees.lmer6, REML=F)
+
+anova(bees.lmer5.1,bees.lmer6.1) #prefer smaller model
+
+bees.lmer7 <- lmer(yieldpercol ~ yrsince1998 + log(priceperlb)*log(stocks) + (yrsince1998|state), data=bees)
+summary(bees.lmer7, cor=FALSE)
+bees.lmer7.1 <- update(bees.lmer7, REML=F)
+
+anova(bees.lmer6.1,bees.lmer7.1) #prefer this model, now all t values two
+```
+
+```{r}
+hist(log(bees$totalprod)) #looks okay
+
+#unconditional means
+bees2.lmer <- lmer(log(totalprod2) ~ 1 + (1|state), data = bees)
+summary(bees2.lmer)
+
+#unconditional growth
+bees2.lmer2 <- lmer(log(totalprod2) ~ yrsince1998 + (1|state), data = bees)
+summary(bees2.lmer2)
+
+#do we need random slope
+bees2.lmer2 <- lmer(log(totalprod2) ~ yrsince1998 + (yrsince1998|state), data = bees)
+bees2.lmer2b <- lmer(log(totalprod2) ~ yrsince1998 + (1|state), data = bees)
+L1 <- logLik(bees2.lmer2)
+L0 <- logLik(bees2.lmer2b)
+D <- 2*(L1-L0)
+.5*(1-pchisq(D, 2)) + .5*(1-pchisq(D,1)) #we do need the random slope
+
+summary(bees2.lmer2)
+```
+
+```{r}
+hist(bees$totalprod)
+bees$totalprod2 <- bees$totalprod/10000 #scale to be smaller
+hist(log(bees$totalprod2))
+
+#build a model with log(totalprod) as response
+bees2.lmer3 <- lmer(log(totalprod2) ~ (log(numcol) + log(stocks) + log(priceperlb) + yrsince1998 + log(nCLOTHIANIDIN) + log(nIMIDACLOPRID) + log(nTHIAMETHOXAM) + log(nACETAMIPRID) + log(nTHIACLOPRID) + log(nAllNeonic))^2 + (yrsince1998|state), data = bees)
+summary(bees2.lmer3, cor = FALSE)
+
+bees2.lmer4 <- update(bees2.lmer3, . ~ . -(log(numcol):log(priceperlb)+log(numcol):log(nIMIDACLOPRID)+log(numcol):log(nTHIAMETHOXAM)+log(numcol):log(nTHIACLOPRID)+log(numcol):log(nTHIACLOPRID)+log(numcol):log(nAllNeonic)+log(stocks):log(priceperlb)+log(stocks):log(nIMIDACLOPRID)+log(stocks):log(nAllNeonic)+log(priceperlb):yrsince1998+log(priceperlb):log(nCLOTHIANIDIN)+log(priceperlb):log(nIMIDACLOPRID)+log(priceperlb):log(nTHIAMETHOXAM)+log(priceperlb):log(nTHIACLOPRID)+log(priceperlb):log(nAllNeonic)+yrsince1998:log(nCLOTHIANIDIN)+yrsince1998:log(nTHIAMETHOXAM)+yrsince1998:log(nTHIACLOPRID)+log(nCLOTHIANIDIN):log(nACETAMIPRID)+log(nCLOTHIANIDIN):log(nTHIACLOPRID)+log(nCLOTHIANIDIN):log(nAllNeonic) +log(nIMIDACLOPRID):log(nTHIAMETHOXAM)+log(nIMIDACLOPRID):log(nTHIACLOPRID)+log(nTHIAMETHOXAM):log(nACETAMIPRID)+log(nTHIAMETHOXAM):log(nAllNeonic)+log(nACETAMIPRID):log(nTHIACLOPRID)+log(nACETAMIPRID):log(nAllNeonic)))
+
+summary(bees2.lmer4, cor = FALSE)
+
+bees2.lmer3.1 <- update(bees2.lmer3, REML=FALSE)
+bees2.lmer4.1 <- update(bees2.lmer4, REML=FALSE)
+anova(bees2.lmer3.1,bees2.lmer4.1) #prefer smaller model
+
+bees2.lmer5 <- update(bees2.lmer4, . ~ . -(log(numcol):log(nACETAMIPRID)+log(nCLOTHIANIDIN):log(nTHIAMETHOXAM)+log(nTHIAMETHOXAM):log(nTHIACLOPRID)+log(nTHIACLOPRID):log(nAllNeonic)))
+summary(bees2.lmer5, cor = FALSE)
+
+bees2.lmer5.1 <- update(bees2.lmer5, REML=FALSE)
+anova(bees2.lmer4.1,bees2.lmer5.1) #prefer smaller model
+
+bees2.lmer6 <- update(bees2.lmer5, . ~ . -(log(stocks):log(nTHIAMETHOXAM)+log(stocks):log(nACETAMIPRID)+log(stocks):log(nTHIACLOPRID)+yrsince1998:log(nACETAMIPRID)+yrsince1998:log(nAllNeonic)+log(nIMIDACLOPRID):log(nAllNeonic)))
+summary(bees2.lmer6, cor = FALSE)
+
+bees2.lmer6.1 <- update(bees2.lmer6, REML=FALSE)
+anova(bees2.lmer5.1,bees2.lmer6.1) #prefer smaller model
+
+bees2.lmer7 <- update(bees2.lmer6,. ~ . -(yrsince1998:log(nIMIDACLOPRID)))
+summary(bees2.lmer7, cor = FALSE)
+
+bees2.lmer7.1 <- update(bees2.lmer7, REML=FALSE)
+anova(bees2.lmer6.1,bees2.lmer7.1) #prefer smaller model
+
+#start taking out non-interaction terms
+bees2.lmer8 <- update(bees2.lmer7,. ~ . -(log(nAllNeonic) + log(nTHIAMETHOXAM) + log(nTHIACLOPRID)))
+summary(bees2.lmer8, cor = FALSE)
+
+bees2.lmer8.1 <- update(bees2.lmer8, REML=FALSE)
+anova(bees2.lmer7.1,bees2.lmer8.1) #prefer smaller model
+
+bees.lmerFINAL <- bees2.lmer8
+
+#================================
+bees.lmer9 <- update(bees2.lmer8,. ~ . -(log(nIMIDACLOPRID):log(nACETAMIPRID)+log(nACETAMIPRID)))
+
+bees.lmer9.1 <- update(bees.lmer9, REML=FALSE)
+
+anova(bees2.lmer8.1,bees2.lmer9.1)
+summary(bees.lmerREM2)
+
+bees.lmerREM3 <- update(bees.lmerREM2,. ~ . -(log(nCLOTHIANIDIN):log(nIMIDACLOPRID) + log(nIMIDACLOPRID)))
+```
+
+```{r}
+predictions <- predict(bees.lmerFINAL, type="response")
+bees$predict <- exp(predictions) #pretty okay
+```
+
+```{r}
+library(HLMdiag)
+
+conditionalResids<-HLMresid(bees.lmerFINAL, level = 1, standardize = T)
+plot(fitted(bees.lmerFINAL), conditionalResids)
+abline(h=0)
+#pretty constant variance
+
+
+#b
+marginalResids <- HLMresid(bees.lmerFINAL, level = "marginal", standardize = T)
+plot(fitted(bees.lmerFINAL), marginalResids) #not really any outliers
+bees[which(marginalResids < -3),] #looked at smallest ones, seems like they have a lot of values of 1 for different chemicals, overpredicted
+#421 546 552
+bees[which(marginalResids > 3),] #looked at smallest ones, seems like they have a lot of values of 1 thiac, underpredicted
+#331 460
+
+#c
+cd <- cooks.distance(bees.lmerFINAL)
+plot(cd, type= "h")
+
+dotplot_diag(cd, cutoff = "internal", name = "cooks.distance")
+bees[which(cd > 0.02),] #all of them have thiac = 1, 2 in SC
+#214 421 545 546 716
+
+#d
+lev <- leverage(bees.lmerFINAL, level=1)
+plot(lev[,1])
+dotplot_diag(lev[,1], cutoff = "internal", name = "leverage")
+#547, 543
+```
+
+
+```{r}
+#if you take out the two repeated high diagnostic values, can cut 4 terms from the model :O
+bees2 <- bees[-c(421,546),]
+bees.lmerREM <- lmer(log(totalprod2) ~ log(numcol) + log(stocks) + log(priceperlb) +
+    yrsince1998 + log(nCLOTHIANIDIN) + log(nIMIDACLOPRID) + log(nACETAMIPRID) +  
+    (yrsince1998 | state) + log(numcol):log(stocks) + log(numcol):yrsince1998 +  
+    log(numcol):log(nCLOTHIANIDIN) + log(stocks):yrsince1998 +  
+    log(stocks):log(nCLOTHIANIDIN) + log(priceperlb):log(nACETAMIPRID) +  
+    log(nCLOTHIANIDIN):log(nIMIDACLOPRID) + log(nIMIDACLOPRID):log(nACETAMIPRID), data = bees2)
+summary(bees.lmerREM)
+
+bees.lmerREM2 <- update(bees.lmerREM,. ~ . -(log(nIMIDACLOPRID):log(nACETAMIPRID)))
+
+bees.lmerREM.1 <- update(bees.lmerREM, REML=FALSE)
+bees.lmerREM2.1 <- update(bees.lmerREM2, REML=FALSE)
+
+anova(bees.lmerREM.1,bees.lmerREM2.1)
+summary(bees.lmerREM2)
+
+bees.lmerREM3 <- update(bees.lmerREM2,. ~ . -(log(nCLOTHIANIDIN):log(nIMIDACLOPRID) + log(nIMIDACLOPRID)))
+bees.lmerREM3.1 <- update(bees.lmerREM3, REML=FALSE)
+
+anova(bees.lmerREM2.1,bees.lmerREM3.1)
+
+summary(bees.lmerREM3, cor=FALSE)
+
+bees.lmerFINAL2 <- bees.lmerREM3
+```
+
+```{r}
+conditionalResids<-HLMresid(bees.lmerFINAL2, level = 1, standardize = T)
+plot(fitted(bees.lmerFINAL2), conditionalResids)
+abline(h=0)
+#constant variance
+
+
+#b
+marginalResids <- HLMresid(bees.lmerFINAL2, level = "marginal", standardize = T)
+plot(fitted(bees.lmerFINAL2), marginalResids) #not really any outliers
+bees[which(marginalResids < -3),] 
+#197 214 550
+bees[which(marginalResids > 3),] 
+#331 459
+
+#c
+cd <- cooks.distance(bees.lmerFINAL2)
+plot(cd, type= "h")
+
+dotplot_diag(cd, cutoff = "internal", name = "cooks.distance")
+bees[which(cd > 0.02),]
+#214 334 429 714
+
+#d
+lev <- leverage(bees.lmerFINAL2, level=1)
+plot(lev[,1])
+bees[which(lev[,1] > .3),]
+dotplot_diag(lev[,1], cutoff = "internal", name = "leverage")
+#542 543 544 545 563
+
+
+summary(bees.lmerFINAL2)
+```
+
+State i, year j
+\begin{align*}
+Level 1:
+\log(TotalProduction_{ij}) = a_i + b_iyrsince1998_{ij} + \gamma \log(numcol)_{ij} + log(stocks) + log(priceperlb) + log(nCLOTHIANIDIN) + log(nACETAMIPRID) + log(numcol):log(stocks) + log(numcol):yrsince1998 + log(numcol):log(nCLOTHIANIDIN) + log(stocks):yrsince1998 + log(stocks):log(nCLOTHIANIDIN) + log(priceperlb):log(nACETAMIPRID) + \epsilon_{ij}
+
+Level 2:
+a_i = \alpha + u_i (random int)
+b_i = \beta + v_i (random slope)
+
+\end{align*}
+ 
