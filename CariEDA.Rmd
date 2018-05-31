@@ -279,7 +279,7 @@ dotplot_diag(cd, cutoff = "internal", name = "cooks.distance")
 bees[which(cd > 0.02),]
 
 #d
-lev <- leverage(lmer.6, level=1)
+lev <- leverage(bees.lmerFINAL, level=1)
 
 dotplot_diag(lev[,1], cutoff = "internal", name = "leverage")
 ```
