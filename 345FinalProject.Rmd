@@ -1,6 +1,6 @@
 ---
 title: "345FinalProject"
-author: "Cari Comnick"
+author: "Cari Comnick and Annie Shapiro"
 date: "May 25, 2018"
 output: pdf_document
 ---
@@ -9,22 +9,59 @@ output: pdf_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
+```{r, include=FALSE}
+library(ggplot2)
+library(knitr)
 ```
 
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r, include=FALSE}
+bees <- read.csv("bees.csv")
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+###Introduction
+This case study seeks to examine the effects of neonic pesticides on the production of honey from honey bee colonies in the United States. Compared to other pesticides, neonics (also known as Neonicotinoids), are reported to cause less toxicity in birds and mammals than insects. As of 2013, neonics have been used on about 95 percent of corn and canola crops, the majority of cotton, sorghum, and sugar beets and about half of all soybeans in the US. They are used as seed coatings on most corn and soybean seeds. Neonics are also used on the vast majority of fruit and vegetables, including apples, cherries, peaches, oranges, berries, leafy greens, tomatoes, and potatoes, to cereal grains, rice, nuts, and wine grapes. They were developed in the early 1990s and were widely used across the United States by the early 2000s. Imidacloprid, a specific type of neonic pesticide, is currently the most widely used insecticide in the world. 
+ 
+Neonic pesticides are quite controversial, as they have been linked in a range of studies to adverse ecological effects, including honey-bee colony collapse disorder (CCD) and loss of birds due to a reduction in insect populations. However,  findings on this issue have been conflicting, thus the pesticides have not yet been directly linked to the decline in the honey bee population. In March 2012, the Center for Food Safety, Pesticide Action Network, Beyond Pesticides and a group of beekeepers filed an emergency petition with the Environmental Protection Agency asking the agency to suspend the use of clothianidin, another type of neonic that was examined in this study, for the sake of protecting the bee populations. The agency denied the petition. In 2013, the European Union and a few non EU countries restricted the use of certain neonicotinoids and in 2018, the EU fully banned the three main neonics (clothianidin, imidacloprid and thiamethoxam, all three of which were examined in this study) for all outdoor uses. Several states in the United States, including Minnesota in 2016, have began to restricted usage of neonicotinoids out of concern for pollinators and bees.
+ 
+ 
+###Methods
+Where/how did you get the data? what are the variables? what are the units?, etc.
+The goal of our analysis is to observe the yearly changes in honey production and consider if these changes are associated with pesticide use, controlling for state. The elements of this study are time and the primary sampling units are the individual states. The response variable is the total honey production in each state in each year.
+ 
+This data is from the US Geological Survey (USGS) and the US Department of Agriculture (USDA), merged by a user on Kaggle. It combines state-level pesticide data with data about honey production and honeybee colonies. This is a longitudinal data set, with information on years 1998 to 2017. However, as  there was no pesticide data recorded for 2016 and 2017, we omit these years and thus our data set spreads from 1998 to 2015. Additionally, the state of Hawaii was omitted as it too did not report any pesticide levels. The data set also did not include the states of Alaska, Delaware, Maryland, Connecticut, New Hampshire, and Massachusetts, leaving us with 43 states to analyze.
+ 
+ Variables about honey production include the number of honey producing colonies, the average honey yield per colony (in pounds), total production of honey in pounds per state per year (in pounds, divided by 10,000), honey stocks, a product of honey production, held by producers (in pounds), the average price per pound in each year and state (in dollars), and production in dollars, the total production times the price per pound. As many of these variables are highly correlated, we carefully considered which were independent enough to be necessary in our model. We chose to include only the price per pound variable, as this would control for outside market effects.
+	
+The  data set also includes pesticide data for 5 different neonic pesticides. Each pesticide is recorded as the amount in kilograms used each year in each state. The pesticides investigated in this study are clothianidin, imidacloprid, thiamethoxam, acetamiprid, and thiacloprid applied at each location and time. An additional variable of the sum of all 5 of the pesticides used per year per state was also provided. As this variable is clearly correlated with others, it was not included in analysis. 
+ 
+###Results
+Below are the summary statistics for the variables in our dataset.
+```{r, results = 'asis', echo=FALSE}
+bees2 <- bees[-c(1:2,9:11,18)]
+bees2$numcol <-bees2$numcol/1000
+bees2$totalprod <- bees2$totalprod/10000
+bees2$prodvalue <- bees2$prodvalue/10000
+colnames(bees2) <- c("Number of Colonies (in 1000s)", "Yield Per Colony", "Total Honey Production (10,000s of lbs)", "Stocks (lbs)", "Price Per Pound (Dollars)", "Product Value (10,000s of Dollars)", "Clothianidin (kg)", "Imidacloprid (kg)", "Thiamethoxam (kg)", "Acetamiprid (kg)", "Thiacloprid (kg)", "All Neonic Pesticides (kg)")
+df <- summary(bees2)
+nas <- which(is.na(df))
+df[nas] <- ""
+kable(df[,c(1:4)], caption = "Summary Statistics")
+kable(df[,c(5:8)], caption = "Summary Statistics")
+kable(df[,c(9:12)], caption = "Summary Statistics")
+#kable(df, caption = "Summary Statistics")
+```
+
+We have a two-level model with state $i$ and year $j$:
+\begin{align*}
+Level 1:
+\log(TotalProduction_{ij}) = a_i + b_iyrsince1998_{ij} + \gamma\log(priceperlb)_{ij} + \delta\log(nCLOTHIANIDIN)_{ij} + \zeta\log(nACETAMIPRID)_{ij} + \eta\log(nCLOTHIANIDIN)_{ij}\log(nACETAMIPRID)_{ij} + \theta\log(priceperlb)_{ij}yrssince1998_{ij} + \epsilon_{ij}
+
+Level 2:
+a_i = \alpha + u_i
+b_i = \beta + v_i
+\end{align*}
+ 
+ 
+###References
+https://www.npr.org/sections/thesalt/2016/08/31/491962115/minnesota-cracks-down-on-neonic-pesticides-promising-aid-to-bees
+https://en.wikipedia.org/wiki/Neonicotinoid#cite_note-10
