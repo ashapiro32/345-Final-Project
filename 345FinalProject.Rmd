@@ -9,13 +9,16 @@ output: pdf_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
+```{r, include = FALSE}
+library(ggplot2)
+library(knitr)
+```
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+```{r, include = FALSE}
+setwd("~/Desktop/Advanced Statistical Modeling/Final Project")
+bees <- read.csv("bees.csv")
+```
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-<<<<<<< HEAD
 ###Introduction
 This case study seeks to examine the effects of neonic pesticides on the production of honey from honey bee colonies in the United States. Compared to other pesticides, neonics (also known as Neonicotinoids), are reported to cause less toxicity in birds and mammals than insects. As of 2013, neonics have been used on about 95 percent of corn and canola crops, the majority of cotton, sorghum, and sugar beets and about half of all soybeans in the US. They are used as seed coatings on most corn and soybean seeds. Neonics are also used on the vast majority of fruit and vegetables, including apples, cherries, peaches, oranges, berries, leafy greens, tomatoes, and potatoes, to cereal grains, rice, nuts, and wine grapes. They were developed in the early 1990s and were widely used across the United States by the early 2000s. Imidacloprid, a specific type of neonic pesticide, is currently the most widely used insecticide in the world. 
  
@@ -45,7 +48,6 @@ df[nas] <- ""
 kable(df[,c(1:4)], caption = "Summary Statistics")
 kable(df[,c(5:8)], caption = "Summary Statistics")
 kable(df[,c(9:12)], caption = "Summary Statistics")
-#kable(df, caption = "Summary Statistics")
 ```
 
 As all variables but year were heavily right skewed, log transformations were taken for all predictors (except for year). Through modeling, we found the following covariates to be significant in predicting the log of the total production: log of price per pound, year since the study began, log of the weight of clothianidin used, log of of the weight of acetamiprid used, an interaction term between the log of price per pound and year, and an interaction between the log of acetamiprid and the log of clothianidin.
@@ -64,7 +66,7 @@ b_i &= \beta + v_i
 \end{align*}
 
 Composite:
-$$\log(TotalProduction_{ij}) = \alpha + \beta yrsince1998_{ij} + \gamma\log(priceperlb)_{ij} + \delta\log(clothianidin_{ij}) + \lambda\log(acetamiprid_{ij}) + $$
+$$\log(TotalProduction_{ij}) = \alpha + \beta yrsince1998_{ij} + \gamma\log(priceperlb_{ij}) + \delta\log(clothianidin_{ij}) + \lambda\log(acetamiprid_{ij}) + $$
 $$\eta\log(clothianidin_{ij})\log(acetamiprid_{ij}) + \theta\log(priceperlb)_{ij}yrssince1998_{ij} +u_i + v_iyrsince1998_{ij} + \epsilon_{ij}$$
 
 Where $$\begin{bmatrix}
@@ -110,18 +112,4 @@ There are a few limitations to this study. It is well-known that climate change,
 ###References
 https://www.npr.org/sections/thesalt/2016/08/31/491962115/minnesota-cracks-down-on-neonic-pesticides-promising-aid-to-bees
 https://en.wikipedia.org/wiki/Neonicotinoid#cite_note-10
-=======
-```{r cars}
-summary(cars)
-```
 
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
->>>>>>> 07de0ca2f1fee2c6250a6070f356d4a2182ed1cf
