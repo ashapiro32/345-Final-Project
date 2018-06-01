@@ -25,7 +25,6 @@ Neonic pesticides are quite controversial, as they have been linked in a range o
  
  
 ###Methods
-Where/how did you get the data? what are the variables? what are the units?, etc.
 The goal of our analysis is to observe the yearly changes in honey production and consider if these changes are associated with pesticide use, controlling for state. The elements of this study are time and the primary sampling units are the individual states. The response variable is the total honey production in each state in each year.
  
 This data is from the US Geological Survey (USGS) and the US Department of Agriculture (USDA), merged by a user on Kaggle. It combines state-level pesticide data with data about honey production and honeybee colonies. This is a longitudinal data set, with information on years 1998 to 2017. However, as  there was no pesticide data recorded for 2016 and 2017, we omit these years and thus our data set spreads from 1998 to 2015. Additionally, the state of Hawaii was omitted as it too did not report any pesticide levels. The data set also did not include the states of Alaska, Delaware, Maryland, Connecticut, New Hampshire, and Massachusetts, leaving us with 43 states to analyze.
@@ -51,16 +50,64 @@ kable(df[,c(9:12)], caption = "Summary Statistics")
 #kable(df, caption = "Summary Statistics")
 ```
 
+As all variables but year were heavily right skewed, log transformations were taken for all predictors (except for year). Through modeling, we found the following covariates to be significant in predicting the log of the total production: log of price per pound, year since the study began, log of the weight of clothianidin used, log of of the weight of acetamiprid used, an interaction term between the log of price per pound and year, and an interaction between the log of acetamiprid and the log of clothianidin.
+Additionally, a random intercept was added for state and a random slope was added for year to account for variance from those two factors. 97.5% of the variation in the model comes from the state level in the first year of the study, 0.0005% of the variation comes from rates of change in the total production over the 17 year observation period, and 2.5% of the variation comes from within state deviations. Despite such little variation coming from time, a p-value of 0 confirms that the random effect for time is still necessary.
+
 We have a two-level model with state $i$ and year $j$:
-\begin{align*}
+
 Level 1:
-\log(TotalProduction_{ij}) = a_i + b_iyrsince1998_{ij} + \gamma\log(priceperlb)_{ij} + \delta\log(nCLOTHIANIDIN)_{ij} + \zeta\log(nACETAMIPRID)_{ij} + \eta\log(nCLOTHIANIDIN)_{ij}\log(nACETAMIPRID)_{ij} + \theta\log(priceperlb)_{ij}yrssince1998_{ij} + \epsilon_{ij}
+$$\log(TotalProduction_{ij}) = a_i + b_iyrsince1998_{ij} + \gamma\log(priceperlb_{ij}) + \delta\log(clothianidin_{ij}) + $$ 
+$$\lambda\log(acetamiprid_{ij}) + \eta\log(clothianidin_{ij})\log(acetamiprid_{ij}) + \theta\log(priceperlb)_{ij}yrssince1998_{ij} + \epsilon_{ij}$$
 
 Level 2:
-a_i = \alpha + u_i
-b_i = \beta + v_i
+\begin{align*}
+a_i &= \alpha + u_i \\
+b_i &= \beta + v_i
 \end{align*}
- 
+
+Composite:
+$$\log(TotalProduction_{ij}) = \alpha + \beta yrsince1998_{ij} + \gamma\log(priceperlb)_{ij} + \delta\log(clothianidin_{ij}) + \lambda\log(acetamiprid_{ij}) + $$
+$$\eta\log(clothianidin_{ij})\log(acetamiprid_{ij}) + \theta\log(priceperlb)_{ij}yrssince1998_{ij} +u_i + v_iyrsince1998_{ij} + \epsilon_{ij}$$
+
+Where $$\begin{bmatrix}
+    u_{i}\\
+    v_{i}
+\end{bmatrix} ^T \sim N(\vec{0}, \Sigma)$$
+
+and $$\Sigma = \begin{bmatrix} \sigma_1 & \rho\sigma_1\sigma_2\\ \rho\sigma_1\sigma_2 & \sigma_2\\ \end{bmatrix}$$
+
+Our estimates for the fixed effects are summarized below:
+\begin{center}
+  \begin{tabular}{ l | c | c | r }
+    \hline
+     Parameter & Estimate & Standard Error & t-Statistic \\ \hline
+     $\alpha$ & 5.201 & 0.210 & 24.800 \\
+     $\beta$ & -0.029 & 0.008 & -3.621 \\
+     $\gamma$ & -0.184 & 0.056 & -3.282 \\
+     $\delta$ &  0.005  & 0.005 & 1.005\\
+     $\lambda$ & 0.006 & 0.007 & 0.865\\
+     $\eta$ & -0.003 & 0.001 & -2.809 \\
+     $\theta$ & 0.016 & 0.005 & 3.390 \\
+    \hline
+  \end{tabular}
+\end{center}
+
+Our estimates for the variance components:
+\begin{center}
+  \begin{tabular}{ l | c | r }
+    \hline
+     Parameter & Variance & Standard Error \\ \hline
+     $\sigma_1$ & 1.851 & 1.361 \\
+     $\sigma_2$ & 0.001 &  0.031 \\
+    \hline
+  \end{tabular}
+\end{center}
+
+Finally, our estimate for the correlation of the random effects is $\rho =  .12$.
+
+###Discussion
+There are a few limitations to this study. It is well-known that climate change, particularly the rising global temperatures, are related to the decline in bee populations. Declining bee populations would lead to a decline in the total production of honey. This study examined only bee colony levels in relation to neonic pesticide use, not accounting for these climate factors. Further research done controlling for these other variables would be a necessary next step in fully understanding the effects of these pesticides on the numbers of bees and the amount of honey being produced. 
+
  
 ###References
 https://www.npr.org/sections/thesalt/2016/08/31/491962115/minnesota-cracks-down-on-neonic-pesticides-promising-aid-to-bees
