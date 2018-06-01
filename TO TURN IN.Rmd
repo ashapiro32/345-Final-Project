@@ -191,3 +191,100 @@ D <- 2*(L1-L0)
 .5*(1-pchisq(D, 2)) + .5*(1-pchisq(D,1)) #do need random slope
 
 ```
+
+```{r}
+#start with model with all pairwise interactions between suggested significant covariates
+#chose pairwise because most seemed like they had interactions
+bees.lmer <- lmer(log(totalprod2) ~ (log(priceperlb) + yrsince1998 + log(nCLOTHIANIDIN) + log(nIMIDACLOPRID) + log(nTHIAMETHOXAM) + log(nACETAMIPRID) + log(nTHIACLOPRID))^2 + (yrsince1998|state), data = bees) #chose to examine all 
+summary(bees.lmer, cor=FALSE)
+
+#take out terms with t between -2 and 2. Start with t-values closest to 0
+bees.lmer1 <- update(bees.lmer,. ~ . -(log(nCLOTHIANIDIN):log(nIMIDACLOPRID)+log(nIMIDACLOPRID):log(nTHIAMETHOXAM)+log(nIMIDACLOPRID):log(nACETAMIPRID)+log(nIMIDACLOPRID):log(nTHIACLOPRID)+log(nTHIAMETHOXAM):log(nACETAMIPRID)+log(nACETAMIPRID):log(nTHIACLOPRID)))
+summary(bees.lmer1, cor = FALSE)
+
+bees.lmer.1 <- update(bees.lmer, REML=F)
+bees.lmer1.1 <- update(bees.lmer1, REML=F)
+
+anova(bees.lmer.1,bees.lmer1.1) #prefer the smaller model
+
+#keep removing 
+bees.lmer2 <- update(bees.lmer1,. ~ . -(log(priceperlb):log(nCLOTHIANIDIN)+log(priceperlb):log(nIMIDACLOPRID)+log(priceperlb):log(nACETAMIPRID)+log(priceperlb):log(nTHIACLOPRID)+yrsince1998:log(nCLOTHIANIDIN)+yrsince1998:log(nACETAMIPRID)+yrsince1998:log(nTHIACLOPRID)))
+summary(bees.lmer2, cor = FALSE)
+
+bees.lmer2.1 <- update(bees.lmer2, REML=F)
+
+anova(bees.lmer1.1,bees.lmer2.1) #prefer the smaller model
+
+
+
+bees.lmer3 <- update(bees.lmer2,. ~ . -(log(priceperlb):log(nTHIAMETHOXAM)))
+summary(bees.lmer3, cor= FALSE)
+
+bees.lmer3.1 <- update(bees.lmer3, REML=F)
+
+anova(bees.lmer3.1,bees.lmer2.1) #prefer the smaller model
+
+
+
+bees.lmer4 <- update(bees.lmer3,. ~ . -(yrsince1998:log(nIMIDACLOPRID)+yrsince1998:log(nTHIAMETHOXAM)))
+summary(bees.lmer4, cor = FALSE)
+
+bees.lmer4.1 <- update(bees.lmer4, REML=F)
+
+anova(bees.lmer3.1,bees.lmer4.1) #prefer the smaller model
+
+
+bees.lmer5 <- update(bees.lmer4,. ~ . -(log(nCLOTHIANIDIN):log(nTHIACLOPRID)))
+summary(bees.lmer5, cor = FALSE)
+
+bees.lmer5.1 <- update(bees.lmer5, REML=F)
+
+anova(bees.lmer5.1,bees.lmer4.1) #prefer the smaller model
+
+
+
+bees.lmer6 <- update(bees.lmer5,. ~ . -(log(nTHIAMETHOXAM):log(nTHIACLOPRID)+log(nTHIACLOPRID)))
+summary(bees.lmer6, cor = FALSE)
+
+bees.lmer6.1 <- update(bees.lmer6, REML=F)
+
+anova(bees.lmer5.1,bees.lmer6.1) #prefer the smaller model
+
+
+bees.lmer7 <- update(bees.lmer6,. ~ . -(log(nCLOTHIANIDIN):log(nTHIAMETHOXAM) + log(nTHIAMETHOXAM) +log(nIMIDACLOPRID)))
+summary(bees.lmer7, cor = FALSE) #final
+
+bees.lmer7.1 <- update(bees.lmer7, REML=F)
+
+anova(bees.lmer7.1,bees.lmer6.1) #prefer the smaller model, no more with t-values that suggest to be insigificant
+```
+
+#check model
+```{r}
+conditionalResids<-HLMresid(bees.lmer7, level = 1, standardize = T)
+plot(fitted(bees.lmer7), conditionalResids)
+abline(h=0)
+#pretty constant variance
+
+
+#b
+marginalResids <- HLMresid(bees.lmer7, level = "marginal", standardize = T)
+plot(fitted(bees.lmer7), marginalResids) #not really any outliers
+bees[which(marginalResids < -2.5),] #183 210 266 267 445 544
+bees[which(marginalResids > 3),] # 66 459
+
+#c
+cd <- cooks.distance(bees.lmer7)
+plot(cd, type= "h")
+
+dotplot_diag(cd, cutoff = "internal", name = "cooks.distance")
+bees[which(cd > 0.02),] #260 421
+
+#d
+lev <- leverage(bees.lmer7, level=1)
+dotplot_diag(lev[,1], cutoff = "internal", name = "leverage")
+#547 543
+
+#because no questionable obs are repeated, we don't take any out
+```
+
