@@ -10,6 +10,8 @@ output: html_document
 library(dplyr)
 bees <- read.csv("~/Desktop/Math345/345-Final-Project/vHoneyNeonic_v02.csv")
 
+bees2 <- read.csv("~/Desktop/Math345/345-Final-Project/vHoneyNeonic_v02.csv")
+
 bees <- bees %>% filter(year != 2016 & year!= 2017 & state != "HI")
 
 ```
@@ -140,10 +142,10 @@ summary(uncondmean) # 59.556 mean yield across all states across all years, 146.
 
 
 #unconditional growth
-uncondgrow <- lmer(yieldpercol ~ yrsince1998 + (yrsince1998|state), data = bees)
+uncondgrow <- lmer(log(totalprod2) ~ yrsince1998 + (yrsince1998|state), data = bees)
 summary(uncondgrow) #67.6229 mean yield in 1998, -0.974 mean yearly change in yield, 98.9023 var within state, 0.6787 var between states in rates of change in yield during the observation period, 314.0613 var btw states in 1998 
 
-uncondgrow2 <- lmer(yieldpercol ~ yrsince1998 + (1|state), data = bees)
+uncondgrow2 <- lmer(log(totalprod2) ~ yrsince1998 + (1|state), data = bees)
 L1 <- logLik(uncondgrow)
 L0 <- logLik(uncondgrow2)
 D <- 2*(L1-L0)

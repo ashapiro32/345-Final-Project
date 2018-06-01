@@ -249,6 +249,16 @@ bees2.lmer8.1 <- update(bees2.lmer8, REML=FALSE)
 anova(bees2.lmer7.1,bees2.lmer8.1) #prefer smaller model
 
 bees.lmerFINAL <- bees2.lmer8
+
+#================================
+bees.lmer9 <- update(bees2.lmer8,. ~ . -(log(nIMIDACLOPRID):log(nACETAMIPRID)+log(nACETAMIPRID)))
+
+bees.lmer9.1 <- update(bees.lmer9, REML=FALSE)
+
+anova(bees2.lmer8.1,bees2.lmer9.1)
+summary(bees.lmerREM2)
+
+bees.lmerREM3 <- update(bees.lmerREM2,. ~ . -(log(nCLOTHIANIDIN):log(nIMIDACLOPRID) + log(nIMIDACLOPRID)))
 ```
 
 ```{r}
@@ -269,19 +279,100 @@ abline(h=0)
 marginalResids <- HLMresid(bees.lmerFINAL, level = "marginal", standardize = T)
 plot(fitted(bees.lmerFINAL), marginalResids) #not really any outliers
 bees[which(marginalResids < -3),] #looked at smallest ones, seems like they have a lot of values of 1 for different chemicals, overpredicted
+#421 546 552
 bees[which(marginalResids > 3),] #looked at smallest ones, seems like they have a lot of values of 1 thiac, underpredicted
+#331 460
 
 #c
 cd <- cooks.distance(bees.lmerFINAL)
 plot(cd, type= "h")
 
 dotplot_diag(cd, cutoff = "internal", name = "cooks.distance")
-bees[which(cd > 0.02),]
+bees[which(cd > 0.02),] #all of them have thiac = 1, 2 in SC
+#214 421 545 546 716
 
 #d
 lev <- leverage(bees.lmerFINAL, level=1)
-
+<<<<<<< HEAD
+=======
+plot(lev[,1])
 dotplot_diag(lev[,1], cutoff = "internal", name = "leverage")
+#547, 543
 ```
 
+
+```{r}
+#if you take out the two repeated high diagnostic values, can cut 4 terms from the model :O
+bees2 <- bees[-c(421,546),]
+bees.lmerREM <- lmer(log(totalprod2) ~ log(numcol) + log(stocks) + log(priceperlb) +
+    yrsince1998 + log(nCLOTHIANIDIN) + log(nIMIDACLOPRID) + log(nACETAMIPRID) +  
+    (yrsince1998 | state) + log(numcol):log(stocks) + log(numcol):yrsince1998 +  
+    log(numcol):log(nCLOTHIANIDIN) + log(stocks):yrsince1998 +  
+    log(stocks):log(nCLOTHIANIDIN) + log(priceperlb):log(nACETAMIPRID) +  
+    log(nCLOTHIANIDIN):log(nIMIDACLOPRID) + log(nIMIDACLOPRID):log(nACETAMIPRID), data = bees2)
+summary(bees.lmerREM)
+
+bees.lmerREM2 <- update(bees.lmerREM,. ~ . -(log(nIMIDACLOPRID):log(nACETAMIPRID)))
+
+bees.lmerREM.1 <- update(bees.lmerREM, REML=FALSE)
+bees.lmerREM2.1 <- update(bees.lmerREM2, REML=FALSE)
+
+anova(bees.lmerREM.1,bees.lmerREM2.1)
+summary(bees.lmerREM2)
+
+bees.lmerREM3 <- update(bees.lmerREM2,. ~ . -(log(nCLOTHIANIDIN):log(nIMIDACLOPRID) + log(nIMIDACLOPRID)))
+bees.lmerREM3.1 <- update(bees.lmerREM3, REML=FALSE)
+
+anova(bees.lmerREM2.1,bees.lmerREM3.1)
+
+summary(bees.lmerREM3, cor=FALSE)
+
+bees.lmerFINAL2 <- bees.lmerREM3
+```
+>>>>>>> b20fcf7ca49e318135ebe6e5a501b0680975eca7
+
+```{r}
+conditionalResids<-HLMresid(bees.lmerFINAL2, level = 1, standardize = T)
+plot(fitted(bees.lmerFINAL2), conditionalResids)
+abline(h=0)
+#constant variance
+
+
+#b
+marginalResids <- HLMresid(bees.lmerFINAL2, level = "marginal", standardize = T)
+plot(fitted(bees.lmerFINAL2), marginalResids) #not really any outliers
+bees[which(marginalResids < -3),] 
+#197 214 550
+bees[which(marginalResids > 3),] 
+#331 459
+
+#c
+cd <- cooks.distance(bees.lmerFINAL2)
+plot(cd, type= "h")
+
+dotplot_diag(cd, cutoff = "internal", name = "cooks.distance")
+bees[which(cd > 0.02),]
+#214 334 429 714
+
+#d
+lev <- leverage(bees.lmerFINAL2, level=1)
+plot(lev[,1])
+bees[which(lev[,1] > .3),]
+dotplot_diag(lev[,1], cutoff = "internal", name = "leverage")
+#542 543 544 545 563
+
+
+summary(bees.lmerFINAL2)
+```
+
+State i, year j
+\begin{align*}
+Level 1:
+\log(TotalProduction_{ij}) = a_i + b_iyrsince1998_{ij} + \gamma \log(numcol)_{ij} + log(stocks) + log(priceperlb) + log(nCLOTHIANIDIN) + log(nACETAMIPRID) + log(numcol):log(stocks) + log(numcol):yrsince1998 + log(numcol):log(nCLOTHIANIDIN) + log(stocks):yrsince1998 + log(stocks):log(nCLOTHIANIDIN) + log(priceperlb):log(nACETAMIPRID) + \epsilon_{ij}
+
+Level 2:
+a_i = \alpha + u_i (random int)
+b_i = \beta + v_i (random slope)
+
+\end{align*}
  
