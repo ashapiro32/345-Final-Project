@@ -10,6 +10,8 @@ output: html_document
 library(dplyr)
 bees <- read.csv("~/Desktop/Math345/345-Final-Project/vHoneyNeonic_v02.csv")
 
+bees2 <- read.csv("~/Desktop/Math345/345-Final-Project/vHoneyNeonic_v02.csv")
+
 bees <- bees %>% filter(year != 2016 & year!= 2017 & state != "HI")
 
 ```
@@ -140,10 +142,10 @@ summary(uncondmean) # 59.556 mean yield across all states across all years, 146.
 
 
 #unconditional growth
-uncondgrow <- lmer(yieldpercol ~ yrsince1998 + (yrsince1998|state), data = bees)
+uncondgrow <- lmer(log(totalprod2) ~ yrsince1998 + (yrsince1998|state), data = bees)
 summary(uncondgrow) #67.6229 mean yield in 1998, -0.974 mean yearly change in yield, 98.9023 var within state, 0.6787 var between states in rates of change in yield during the observation period, 314.0613 var btw states in 1998 
 
-uncondgrow2 <- lmer(yieldpercol ~ yrsince1998 + (1|state), data = bees)
+uncondgrow2 <- lmer(log(totalprod2) ~ yrsince1998 + (1|state), data = bees)
 L1 <- logLik(uncondgrow)
 L0 <- logLik(uncondgrow2)
 D <- 2*(L1-L0)
@@ -272,5 +274,34 @@ lev <- leverage(lmer.6, level=1)
 
 dotplot_diag(lev[,1], cutoff = "internal", name = "leverage")
 
+```
+
+
+##PLOTS FOR REPORT
+```{r}
+hist(bees$priceperlb, main = "Histogram of Price Per LB", xlab = "Price", ylab="")
+hist(bees$nCLOTHIANIDIN, main = "Histogram of Clothianidid Levels (kg/State/Year)", xlab = "Clothianidid", ylab="")
+hist(bees$nACETAMIPRID, main = "Histogram of Acetamiprid Levels (kg/State/Year)", xlab = "Acetamiprid", ylab="")
+
+hist(log(bees$priceperlb),  main = "Histogram of Logged Price Per LB", xlab = "Price", ylab="")
+hist(log(bees$nCLOTHIANIDIN), main = "Histogram of Logged Clothianidid Levels (kg/State/Year)", xlab = "log(Clothianidid)", ylab="")
+hist(log(bees$nACETAMIPRID), main = "Histogram of Acetamiprid Levels (kg/State/Year)", xlab = "log(Acetamiprid)", ylab="")
+
+
+ggplot(bees) + geom_point(aes(x=log(priceperlb), y=log(totalprod))) + labs(title = "Logged Price Per lb vs. Logged Total Production) ", x = "log(Price Per lb)", y="log(Total Production)")  
+ggplot(bees) + geom_point(aes(x=log(nCLOTHIANIDIN), y=log(totalprod))) + labs(title = "Logged Clothianidid vs. Logged Total Production) ", x = "log(Clothianidid)", y="log(Total Production)")  
+ggplot(bees) + geom_point(aes(x=log(nACETAMIPRID), y=log(totalprod))) + labs(title = "Logged Acetamiprid vs. Logged Total Production) ", x = "log(Acetamiprid)", y="log(Total Production)")  
+
+
+
+
+bees$nACETAMIPRIDFACTOR <- cut_number(bees$nACETAMIPRID, 4)
+
+ggplot(bees) + geom_point(aes(x=log(nCLOTHIANIDIN),y=log(totalprod), color = nACETAMIPRIDFACTOR))+geom_smooth(aes(x=log(nCLOTHIANIDIN),y=log(totalprod), color = nACETAMIPRIDFACTOR), method = "nls", formula = y ~ a * x + b, se = FALSE, method.args = list(start = list(a = 0.1, b = 0.1))) + labs(color="log(Acetamiprid Levels)", title = "log(Clothianidid) vs.  log(Production Levels) by log(Acetamiprid Levels)", x = "log(Clothianidid Levels)", y="log(Total Production)")  
+
+
+bees$pplbFACTOR <- cut_number(bees$priceperlb, 4)
+
+ggplot(bees) + geom_point(aes(x=yrsince1998 ,y=log(totalprod), color = pplbFACTOR))+geom_smooth(aes(x=yrsince1998, y=log(totalprod), color = pplbFACTOR), method = "nls", formula = y ~ a * x + b, se = FALSE, method.args = list(start = list(a = 0.1, b = 0.1))) + labs(color="log(Price Per lb)", title = "Year vs. log(Production Levels) by log(Price Per lb)", x = "log(Year Since 1998)", y="log(Total Production)") 
 
 ```
