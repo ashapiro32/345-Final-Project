@@ -50,15 +50,15 @@ colnames(bees)
 bees$priceperlbFACTOR <- cut_number(bees$priceperlb, 3)
 p <- ggplot(bees)
 
-p + geom_point(aes(x=log(nCLOTHIANIDIN),y=yieldpercol, color = priceperlbFACTOR))+geom_smooth(aes(x=log(nCLOTHIANIDIN),y=yieldpercol, color = priceperlbFACTOR), method = "nls", formula = y ~ a * x + b, se = FALSE, method.args = list(start = list(a = 0.1, b = 0.1))) #since the lines aren't parallel, suggests interaction between price per lb and nCLOTHIANIDIN
+p + geom_point(aes(x=log(nCLOTHIANIDIN),y=yieldpercol, color = priceperlbFACTOR))+geom_smooth(aes(x=log(nCLOTHIANIDIN),y=yieldpercol, color = priceperlbFACTOR), method = "nls", formula = y ~ a * x + b, se = FALSE, method.args = list(start = list(a = 0.1, b = 0.1))) #maybe interaction between price per lb and nCLOTHIANIDIN
 
 p + geom_point(aes(x=log(nIMIDACLOPRID),y=yieldpercol, color = priceperlbFACTOR))+geom_smooth(aes(x=log(nIMIDACLOPRID),y=yieldpercol, color = priceperlbFACTOR), method = "nls", formula = y ~ a * x + b, se = FALSE, method.args = list(start = list(a = 0.1, b = 0.1))) #parallel, so no interaction between pplb and nimidacloprid
 
-p + geom_point(aes(x=log(nTHIAMETHOXAM),y=yieldpercol, color = priceperlbFACTOR))+geom_smooth(aes(x=log(nTHIAMETHOXAM),y=yieldpercol, color = priceperlbFACTOR), method = "nls", formula = y ~ a * x + b, se = FALSE, method.args = list(start = list(a = 0.1, b = 0.1))) #maybe interaction between pplb and nTHIAMETHOXAM
+p + geom_point(aes(x=log(nTHIAMETHOXAM),y=yieldpercol, color = priceperlbFACTOR))+geom_smooth(aes(x=log(nTHIAMETHOXAM),y=yieldpercol, color = priceperlbFACTOR), method = "nls", formula = y ~ a * x + b, se = FALSE, method.args = list(start = list(a = 0.1, b = 0.1))) #interaction between pplb and nTHIAMETHOXAM
 
-p + geom_point(aes(x=log(nACETAMIPRID),y=yieldpercol, color = priceperlbFACTOR))+geom_smooth(aes(x=log(nACETAMIPRID),y=yieldpercol, color = priceperlbFACTOR), method = "nls", formula = y ~ a * x + b, se = FALSE, method.args = list(start = list(a = 0.1, b = 0.1))) #interaction between pplb and nACETAMIPRID
+p + geom_point(aes(x=log(nACETAMIPRID),y=yieldpercol, color = priceperlbFACTOR))+geom_smooth(aes(x=log(nACETAMIPRID),y=yieldpercol, color = priceperlbFACTOR), method = "nls", formula = y ~ a * x + b, se = FALSE, method.args = list(start = list(a = 0.1, b = 0.1))) #maybe interaction between pplb and nACETAMIPRID
 
-p + geom_point(aes(x=log(nTHIACLOPRID),y=yieldpercol, color = priceperlbFACTOR))+geom_smooth(aes(x=log(nTHIACLOPRID),y=yieldpercol, color = priceperlbFACTOR), method = "nls", formula = y ~ a * x + b, se = FALSE, method.args = list(start = list(a = 0.1, b = 0.1))) #definitely interaction between pplb and nTHIACLOPRID (? seems like the lots of very small values are really skewing it)
+p + geom_point(aes(x=log(nTHIACLOPRID),y=yieldpercol, color = priceperlbFACTOR))+geom_smooth(aes(x=log(nTHIACLOPRID),y=yieldpercol, color = priceperlbFACTOR), method = "nls", formula = y ~ a * x + b, se = FALSE, method.args = list(start = list(a = 0.1, b = 0.1))) #maybe interaction between pplb and nTHIACLOPRID
 
 p + geom_point(aes(x=log(nAllNeonic),y=yieldpercol, color = priceperlbFACTOR))+geom_smooth(aes(x=log(nAllNeonic),y=yieldpercol, color = priceperlbFACTOR), method = "nls", formula = y ~ a * x + b, se = FALSE, method.args = list(start = list(a = 0.1, b = 0.1))) #maybe interaction
 ```
@@ -249,6 +249,7 @@ bees2.lmer8.1 <- update(bees2.lmer8, REML=FALSE)
 anova(bees2.lmer7.1,bees2.lmer8.1) #prefer smaller model
 
 bees.lmerFINAL <- bees2.lmer8
+<<<<<<< HEAD
 
 #================================
 bees.lmer9 <- update(bees2.lmer8,. ~ . -(log(nIMIDACLOPRID):log(nACETAMIPRID)+log(nACETAMIPRID)))
@@ -259,6 +260,9 @@ anova(bees2.lmer8.1,bees2.lmer9.1)
 summary(bees.lmerREM2)
 
 bees.lmerREM3 <- update(bees.lmerREM2,. ~ . -(log(nCLOTHIANIDIN):log(nIMIDACLOPRID) + log(nIMIDACLOPRID)))
+=======
+summary(bees.lmerFINAL)
+>>>>>>> faa61da93014331c9ec940ca40097fc56f63c628
 ```
 
 ```{r}
@@ -365,6 +369,7 @@ dotplot_diag(lev[,1], cutoff = "internal", name = "leverage")
 summary(bees.lmerFINAL2)
 ```
 
+<<<<<<< HEAD
 State i, year j
 \begin{align*}
 Level 1:
@@ -376,3 +381,177 @@ b_i = \beta + v_i (random slope)
 
 \end{align*}
  
+=======
+
+New EDA for total prod interactions:
+```{r}
+p <- ggplot(bees)
+
+p + geom_point(aes(x=log(nCLOTHIANIDIN),y=log(totalprod2), color = priceperlbFACTOR))+geom_smooth(aes(x=log(nCLOTHIANIDIN),y=log(totalprod2), color = priceperlbFACTOR), method = "nls", formula = y ~ a * x + b, se = FALSE, method.args = list(start = list(a = 0.1, b = 0.1))) #since the lines aren't parallel, suggests interaction between price per lb and nCLOTHIANIDIN
+
+p + geom_point(aes(x=log(nIMIDACLOPRID),y=log(totalprod2), color = priceperlbFACTOR))+geom_smooth(aes(x=log(nIMIDACLOPRID),y=log(totalprod2), color = priceperlbFACTOR), method = "nls", formula = y ~ a * x + b, se = FALSE, method.args = list(start = list(a = 0.1, b = 0.1))) #parallel, so no interaction between pplb and nimidacloprid
+
+p + geom_point(aes(x=log(nTHIAMETHOXAM),y=log(totalprod2), color = priceperlbFACTOR))+geom_smooth(aes(x=log(nTHIAMETHOXAM),y=log(totalprod2), color = priceperlbFACTOR), method = "nls", formula = y ~ a * x + b, se = FALSE, method.args = list(start = list(a = 0.1, b = 0.1))) #interaction between pplb and nTHIAMETHOXAM
+
+p + geom_point(aes(x=log(nACETAMIPRID),y=log(totalprod2), color = priceperlbFACTOR))+geom_smooth(aes(x=log(nACETAMIPRID),y=log(totalprod2), color = priceperlbFACTOR), method = "nls", formula = y ~ a * x + b, se = FALSE, method.args = list(start = list(a = 0.1, b = 0.1))) #interaction between pplb and nACETAMIPRID
+
+p + geom_point(aes(x=log(nTHIACLOPRID),y=log(totalprod2), color = priceperlbFACTOR))+geom_smooth(aes(x=log(nTHIACLOPRID),y=log(totalprod2), color = priceperlbFACTOR), method = "nls", formula = y ~ a * x + b, se = FALSE, method.args = list(start = list(a = 0.1, b = 0.1))) #definitely interaction between pplb and nTHIACLOPRID (? seems like the lots of very small values are really skewing it)
+
+p + geom_point(aes(x=log(nAllNeonic),y=log(totalprod2), color = priceperlbFACTOR))+geom_smooth(aes(x=log(nAllNeonic),y=log(totalprod2), color = priceperlbFACTOR), method = "nls", formula = y ~ a * x + b, se = FALSE, method.args = list(start = list(a = 0.1, b = 0.1))) #no interaction
+```
+
+```{r}
+#interactions among chemicals
+bees$nCLOTHIANIDINFACTOR <- cut_number(bees$nCLOTHIANIDIN, 2)
+bees$nIMIDACLOPRIDFACTOR <- cut_number(bees$nIMIDACLOPRID, 3)
+bees$nTHIAMETHOXAMFACTOR <- cut_number(bees$nTHIAMETHOXAM, 3)
+bees$nACETAMIPRIDFACTOR <- cut_number(bees$nACETAMIPRID, 2)
+bees$nTHIACLOPRIDFACTOR <- cut_number(bees$nTHIACLOPRID, 2)
+
+q <- ggplot(bees)
+
+#nclothiandin
+q + geom_point(aes(x=log(nCLOTHIANIDIN),y=log(totalprod2), color = nIMIDACLOPRIDFACTOR))+geom_smooth(aes(x=log(nCLOTHIANIDIN),y=log(totalprod2), color = nIMIDACLOPRIDFACTOR),method = "nls", formula = y ~ a * x + b, se = FALSE, method.args = list(start = list(a = 0.1, b = 0.1))) #interaction between nIMIDACLOPRID and nCLOTHIANIDIN
+
+q + geom_point(aes(x=log(nCLOTHIANIDIN),y=log(totalprod2), color = nTHIAMETHOXAMFACTOR))+geom_smooth(aes(x=log(nCLOTHIANIDIN),y=log(totalprod2), color = nTHIAMETHOXAMFACTOR), method = "nls", formula = y ~ a * x + b, se = FALSE, method.args = list(start = list(a = 0.1, b = 0.1))) #interaction between nTHIAMETHOXAM and nCLOTHIANIDIN
+
+q + geom_point(aes(x=log(nCLOTHIANIDIN),y=log(totalprod2), color = nACETAMIPRIDFACTOR))+geom_smooth(aes(x=log(nCLOTHIANIDIN),y=log(totalprod2), color = nACETAMIPRIDFACTOR), method = "nls", formula = y ~ a * x + b, se = FALSE, method.args = list(start = list(a = 0.1, b = 0.1))) #no interaction between nACETAMIPRID and nCLOTHIANIDIN
+
+#imodacloprid
+q + geom_point(aes(x=log(nIMIDACLOPRID),y=log(totalprod2), color = nTHIAMETHOXAMFACTOR))+geom_smooth(aes(x=log(nIMIDACLOPRID),y=log(totalprod2), color = nTHIAMETHOXAMFACTOR), method = "nls", formula = y ~ a * x + b, se = FALSE, method.args = list(start = list(a = 0.1, b = 0.1))) #interaction between nIMIDACLOPRID and nTHIAMETHOXAM
+
+q + geom_point(aes(x=log(nIMIDACLOPRID),y=log(totalprod2), color = nACETAMIPRIDFACTOR))+geom_smooth(aes(x=log(nIMIDACLOPRID),y=log(totalprod2), color = nACETAMIPRIDFACTOR), method = "nls", formula = y ~ a * x + b, se = FALSE, method.args = list(start = list(a = 0.1, b = 0.1))) #interaction between nIMIDACLOPRID and nACETAMIPRID
+
+#nTHIAMETHOXAM
+q + geom_point(aes(x=log(nTHIAMETHOXAM),y=log(totalprod2), color = nACETAMIPRIDFACTOR))+geom_smooth(aes(x=log(nTHIAMETHOXAM),y=log(totalprod2), color = nACETAMIPRIDFACTOR), method = "nls", formula = y ~ a * x + b, se = FALSE, method.args = list(start = list(a = 0.1, b = 0.1))) #interaction between nTHIAMETHOXAM and nACETAMIPRID
+
+#nTHIACLOPRID
+q + geom_point(aes(x=log(nTHIACLOPRID),y=log(totalprod2), color = nCLOTHIANIDINFACTOR))+geom_smooth(aes(x=log(nTHIACLOPRID),y=log(totalprod2), color = nCLOTHIANIDINFACTOR), method = "nls", formula = y ~ a * x + b, se = FALSE, method.args = list(start = list(a = 0.1, b = 0.1))) #interaction between nTHIACLOPRID and nCLOTHIANIDIN
+
+q + geom_point(aes(x=log(nTHIACLOPRID),y=log(totalprod2), color = nIMIDACLOPRIDFACTOR))+geom_smooth(aes(x=log(nTHIACLOPRID),y=log(totalprod2), color = nIMIDACLOPRIDFACTOR), method = "nls", formula = y ~ a * x + b, se = FALSE, method.args = list(start = list(a = 0.1, b = 0.1))) #maybe interaction between nTHIACLOPRID and nIMIDACLOPRID
+
+q + geom_point(aes(x=log(nTHIACLOPRID),y=log(totalprod2), color = nTHIAMETHOXAMFACTOR))+geom_smooth(aes(x=log(nTHIACLOPRID),y=log(totalprod2), color = nTHIAMETHOXAMFACTOR), method = "nls", formula = y ~ a * x + b, se = FALSE, method.args = list(start = list(a = 0.1, b = 0.1))) #interaction between nTHIACLOPRID and nTHIAMETHOXAM
+
+q + geom_point(aes(x=log(nTHIACLOPRID),y=log(totalprod2), color = nACETAMIPRIDFACTOR))+geom_smooth(aes(x=log(nTHIACLOPRID),y=log(totalprod2), color = nACETAMIPRIDFACTOR), method = "nls", formula = y ~ a * x + b, se = FALSE, method.args = list(start = list(a = 0.1, b = 0.1))) #interaction between nTHIACLOPRID and nACETAMIPRID
+```
+
+```{r}
+#interactions between stocks and everything
+bees$stocksFACTOR <- cut_number(bees$stocks, 3)
+yrsince1998FACTOR <- cut_number(bees$yrsince1998, 5)
+r <- ggplot(bees)
+
+r + geom_point(aes(x=log(stocks),y=log(totalprod2), color = yrsince1998FACTOR))+geom_smooth(aes(x=log(stocks),y=log(totalprod2), color = yrsince1998FACTOR), method = "nls", formula = y ~ a * x + b, se = FALSE, method.args = list(start = list(a = 0.1, b = 0.1))) #interaction between stocks and years since 1998
+
+r + geom_point(aes(x=log(stocks),y=log(totalprod2), color = nIMIDACLOPRIDFACTOR))+geom_smooth(aes(x=log(stocks),y=log(totalprod2), color = nIMIDACLOPRIDFACTOR), method = "nls", formula = y ~ a * x + b, se = FALSE, method.args = list(start = list(a = 0.1, b = 0.1))) #maybe interaction between stocks and nCLOTHIANIDIN
+
+r + geom_point(aes(x=log(stocks),y=log(totalprod2), color = nIMIDACLOPRIDFACTOR))+geom_smooth(aes(x=log(stocks),y=log(totalprod2), color = nIMIDACLOPRIDFACTOR), method = "nls", formula = y ~ a * x + b, se = FALSE, method.args = list(start = list(a = 0.1, b = 0.1))) #no interaction between stocks and nIMIDACLOPRID
+
+r + geom_point(aes(x=log(stocks),y=log(totalprod2), color = nTHIAMETHOXAMFACTOR))+geom_smooth(aes(x=log(stocks),y=log(totalprod2), color = nTHIAMETHOXAMFACTOR), method = "nls", formula = y ~ a * x + b, se = FALSE, method.args = list(start = list(a = 0.1, b = 0.1))) #interaction between stocks and nTHIAMETHOXAM
+
+r + geom_point(aes(x=log(stocks),y=log(totalprod2), color = nACETAMIPRIDFACTOR))+geom_smooth(aes(x=log(stocks),y=log(totalprod2), color = nACETAMIPRIDFACTOR), method = "nls", formula = y ~ a * x + b, se = FALSE, method.args = list(start = list(a = 0.1, b = 0.1))) #interaction between stocks and nACETAMIPRID
+
+r + geom_point(aes(x=log(nTHIACLOPRID),y=log(totalprod2), color = stocksFACTOR))+geom_smooth(aes(x=log(nTHIACLOPRID),y=log(totalprod2), color = stocksFACTOR), method = "nls", formula = y ~ a * x + b, se = FALSE, method.args = list(start = list(a = 0.1, b = 0.1))) #maybe interaction between stocks and nTHIACLOPRID
+
+r + geom_point(aes(x=log(stocks),y=log(totalprod2), color = priceperlbFACTOR))+geom_smooth(aes(x=log(stocks),y=log(totalprod2), color = priceperlbFACTOR), method = "nls", formula = y ~ a * x + b, se = FALSE, method.args = list(start = list(a = 0.1, b = 0.1))) #interaction between stocks and and price per lb
+```
+
+
+```{r}
+bees3.lmer <- lmer(log(totalprod2) ~ (log(priceperlb) + yrsince1998 + log(nCLOTHIANIDIN) + log(nIMIDACLOPRID) + log(nTHIAMETHOXAM) + log(nACETAMIPRID) + log(nTHIACLOPRID))^2 + (yrsince1998|state), data = bees)
+summary(bees3.lmer, cor=FALSE)
+
+bees3.lmer1 <- update(bees3.lmer,. ~ . -(log(nCLOTHIANIDIN):log(nIMIDACLOPRID)+log(nIMIDACLOPRID):log(nTHIAMETHOXAM)+log(nIMIDACLOPRID):log(nACETAMIPRID)+log(nIMIDACLOPRID):log(nTHIACLOPRID)+log(nTHIAMETHOXAM):log(nACETAMIPRID)+log(nACETAMIPRID):log(nTHIACLOPRID)))
+summary(bees3.lmer1, cor = FALSE)
+
+bees3.lmer.1 <- update(bees3.lmer, REML=F)
+bees3.lmer1.1 <- update(bees3.lmer1, REML=F)
+
+anova(bees3.lmer.1,bees3.lmer1.1) #prefer the smaller model
+
+
+bees3.lmer2 <- update(bees3.lmer1,. ~ . -(log(priceperlb):log(nCLOTHIANIDIN)+log(priceperlb):log(nIMIDACLOPRID)+log(priceperlb):log(nACETAMIPRID)+log(priceperlb):log(nTHIACLOPRID)+yrsince1998:log(nCLOTHIANIDIN)+yrsince1998:log(nACETAMIPRID)+yrsince1998:log(nTHIACLOPRID)))
+summary(bees3.lmer2, cor = FALSE)
+
+bees3.lmer2.1 <- update(bees3.lmer2, REML=F)
+
+anova(bees3.lmer1.1,bees3.lmer2.1) #prefer the smaller model
+
+
+
+bees3.lmer3 <- update(bees3.lmer2,. ~ . -(log(priceperlb):log(nTHIAMETHOXAM)))
+summary(bees3.lmer3, cor= FALSE)
+
+bees3.lmer3.1 <- update(bees3.lmer3, REML=F)
+
+anova(bees3.lmer3.1,bees3.lmer2.1) #prefer the smaller model
+
+
+
+bees3.lmer4 <- update(bees3.lmer3,. ~ . -(yrsince1998:log(nIMIDACLOPRID)+yrsince1998:log(nTHIAMETHOXAM)))
+summary(bees3.lmer4, cor = FALSE)
+
+bees3.lmer4.1 <- update(bees3.lmer4, REML=F)
+
+anova(bees3.lmer3.1,bees3.lmer4.1) #prefer the smaller model
+
+
+bees3.lmer5 <- update(bees3.lmer4,. ~ . -(log(nCLOTHIANIDIN):log(nTHIACLOPRID)))
+summary(bees3.lmer5, cor = FALSE)
+
+bees3.lmer5.1 <- update(bees3.lmer5, REML=F)
+
+anova(bees3.lmer5.1,bees3.lmer4.1) #prefer the smaller model
+
+
+
+bees3.lmer6 <- update(bees3.lmer5,. ~ . -(log(nTHIAMETHOXAM):log(nTHIACLOPRID)+log(nTHIACLOPRID)))
+summary(bees3.lmer6, cor = FALSE)
+
+bees3.lmer6.1 <- update(bees3.lmer6, REML=F)
+
+anova(bees3.lmer5.1,bees3.lmer6.1) #prefer the smaller model
+
+
+bees3.lmer7 <- update(bees3.lmer6,. ~ . -(log(nCLOTHIANIDIN):log(nTHIAMETHOXAM) + log(nTHIAMETHOXAM) +log(nIMIDACLOPRID)))
+summary(bees3.lmer7, cor = FALSE) #final
+
+bees3.lmer7.1 <- update(bees3.lmer7, REML=F)
+
+anova(bees3.lmer7.1,bees3.lmer6.1) #prefer the smaller model
+```
+
+```{r}
+#interpretation of interactions
+#price per lb in a given year
+x <- c(seq(0,17,by=1))
+2^(-.18)*2^(.016*x)
+```
+
+
+```{r}
+conditionalResids<-HLMresid(bees3.lmer7, level = 1, standardize = T)
+plot(fitted(bees3.lmer7), conditionalResids)
+abline(h=0)
+#pretty constant variance
+
+
+#b
+marginalResids <- HLMresid(bees3.lmer7, level = "marginal", standardize = T)
+plot(fitted(bees3.lmer7), marginalResids) #not really any outliers
+bees[which(marginalResids < -2.5),] #183 210 266 267 445 544
+bees[which(marginalResids > 3),] # 66 459
+
+#c
+cd <- cooks.distance(bees3.lmer7)
+plot(cd, type= "h")
+
+dotplot_diag(cd, cutoff = "internal", name = "cooks.distance")
+bees[which(cd > 0.02),] #260 421
+
+#d
+lev <- leverage(bees3.lmer7, level=1)
+dotplot_diag(lev[,1], cutoff = "internal", name = "leverage")
+#547 543
+```
+>>>>>>> faa61da93014331c9ec940ca40097fc56f63c628

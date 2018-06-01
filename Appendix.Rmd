@@ -1,0 +1,32 @@
+---
+title: "Appendix"
+author: "Annie Shapiro"
+date: "6/1/2018"
+output: html_document
+---
+
+```{r}
+conditionalResids<-HLMresid(bees3.lmer7, level = 1, standardize = T)
+plot(fitted(bees3.lmer7), conditionalResids)
+abline(h=0)
+#pretty constant variance
+
+
+#b
+marginalResids <- HLMresid(bees3.lmer7, level = "marginal", standardize = T)
+plot(fitted(bees3.lmer7), marginalResids) #not really any outliers
+bees[which(marginalResids < -2.5),] #183 210 266 267 445 544
+bees[which(marginalResids > 3),] # 66 459
+
+#c
+cd <- cooks.distance(bees3.lmer7)
+plot(cd, type= "h")
+
+dotplot_diag(cd, cutoff = "internal", name = "cooks.distance")
+bees[which(cd > 0.02),] #260 421
+
+#d
+lev <- leverage(bees3.lmer7, level=1)
+dotplot_diag(lev[,1], cutoff = "internal", name = "leverage")
+#547 543
+```
