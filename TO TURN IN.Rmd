@@ -295,3 +295,33 @@ dotplot_diag(lev[,1], cutoff = "internal", name = "leverage")
 #because no questionable obs are repeated, we don't take any out
 ```
 
+#interpretations
+```{r}
+#price per lb in a given year
+x <- c(seq(0,17,by=1))
+2^(-.18)*2^(.016*x)
+
+#interpret pesticide coefficient
+#log(nCLOTHIANIDIN) 0.0046102
+#log(nACETAMIPRID) 0.0060765
+#log(nCLOTHIANIDIN):log(nACETAMIPRID) -0.0026637
+#log(y) = 0.0046102*log(cloth)+0.0060765*(log(acet))-0.0026637*log(cloth)*log(acet)
+#set cloth=9 and double acet
+g <- 1 #doesn't matter what this is
+x <- 9 #most common value
+logy <- 0.0046102*(x)+0.0060765*(log(g))-0.0026637*x*log(g)
+logy1 <- 0.0046102*(x)+0.0060765*(log(2*g))-0.0026637*x*log(2*g)
+
+exp(logy1)/exp(logy)
+#0.9876715
+
+
+#set acet=y and double cloth
+y <- 7 #most common value of acet
+logy.1 <- 0.0046102*(log(g))+0.0060765*(y)-0.0026637*y*log(g)
+logy1.1 <- 0.0046102*(log(2*g))+0.0060765*(y)-0.0026637*y*log(2*g)
+
+exp(logy1.1)/exp(logy.1)
+#0.9903184
+```
+
