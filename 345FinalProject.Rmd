@@ -60,6 +60,8 @@ kable(df[,c(5:8)], caption = "Summary Statistics")
 kable(df[,c(9:12)], caption = "Summary Statistics")
 ```
 
+Some trends that we saw in our initial EDA about patterns among states included the following: North Dakota and California tended have the highest number of colonies as well as total production, while Mississippi and Louisiana are most of the top yield per colonies. South Carolina and Kentucky have the lowest numbers of stocks, while South Dakota has the most. The Midwest states tend to have the higest rates of clothianidin use, while California tends to use the most imidacloprid, followed by Midwest states. The Midwest and Texas use the most thiamethoxam, and California uses the most acetamiprid by far. New York and Washington have the highest thiacloprid usage. Finally, overall, the Midwest states have the highest total use of neonics.
+
 Through modeling, we found the following covariates to be significant in predicting the log of the total production: log of price per pound, year since the study began, log of the weight of clothianidin used, log of of the weight of acetamiprid used, an interaction term between the log of price per pound and year, and an interaction between the log of acetamiprid and the log of clothianidin.
 
 ```{r, echo = FALSE, fig.align="center", fig.height=4, fig.width=6}
@@ -165,12 +167,12 @@ Our estimates for the variance components:
 
 Finally, our estimate for the correlation of the random effects is $\rho =  .12$.
 
-Interestingly, we didn’t find that most of the neonic chemicals were significant in our model. We ended up with the a significant interaction between kilograms of clothianidin and acetamiprid, although neither chemical on its own proved significant. This is seen in the confidence intervals for each coefficient. The confidence interval for both log(clothianidin) and log(acetamiprid) contain 0, however their interaction has a negative effect on the log of total production. 
+Interestingly, we didn’t find that most of the neonic chemicals were significant in our model. We ended up with the a significant interaction between kilograms of clothianidin and acetamiprid, although neither chemical on its own proved significant. This is seen in the confidence intervals for each coefficient. The confidence interval for both log(clothianidin) and log(acetamiprid) contain 0; however, their interaction has a negative effect on the log of total production. 
 
 Individually, year since 1998 and price per pound both have negative coefficients, suggesting that an increase in either one results in a decrease in the total production of honey, but their interaction has a positive coefficient. This makes it difficult to interpret the the effect of each covariate generally for the model. However, in fixing one at a specific number we can see how the other would affect the total production of honey. 
 
 Given that neonic pesticide use increased in the US around 2003, we wanted to see the effect of year and its interaction with price per pound in 2002, 2003, and 2004. Holding pesticide use constant, we find that in 2002 (4 years since 1998), a doubling of the price per pound is associated with a $2^{-.18}2^{.016*4} = .923$ multiplicative change (or an 7.7% decrease) in the median number of bee colonies. Similarly, for 2003, this doubling is associated with a 6.7% decrease and in 2004, it is associated with a 5.6% decrease. 
-For the interaction between clothianidin and acetamiprid, we observe what happens if we fix the level of one pesticide double the amount of the other one. We chose to fix each at its most common logged value, 9 for clothianidin and 7 for acetamiprid. Doubling acetamiprid while fixing clothianidin at 9 results in a 1.2% decrease in the median number of colonies.  Doubling clothianidin while fixing acetamiprid at 7 results in a 0.97% decrease in the median number of colonies.  
+For the interaction between clothianidin and acetamiprid, we observe what happens if we fix the level of one pesticide double the amount of the other one. We chose to fix each at its most common logged value, 9 for clothianidin and 7 for acetamiprid. Doubling acetamiprid while fixing clothianidin at 9 results in a 1.2% decrease in the median number of colonies. Doubling clothianidin while fixing acetamiprid at 7 results in a 0.97% decrease in the median number of colonies.  
 
 It should be noted that when diagnostics were checked, a few minor outliers and influential points were found. However, as each type of diagnostic checked showed different outliers or influential points (none were flagged among multiple diagnostics), no points were taken out. See appendix for plots and further explanation.
  
@@ -196,9 +198,9 @@ Diagnostic plots showed some potential outliers or influential points in our mod
 
 The conditional residuals suggest constant variance. Although the variance is slightly less with larger fitted values, we suspect this is due in part to having fewer observations with larger fitted values. 
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, fig.align='center', fig.height=3, fig.width=4}
 conditionalResids<-HLMresid(bees3.lmer7, level = 1, standardize = T)
-plot(fitted(bees3.lmer7), conditionalResids)
+plot(fitted(bees3.lmer7), conditionalResids, main = "Conditional Residuals vs. Fitted Values", ylab = "Conditional Residuals", xlab = "Fitted Values")
 abline(h=0)
 #pretty constant variance
 ```
@@ -210,7 +212,7 @@ The marginal residuals show a few outliers. The largest outliers are seen for th
 ```{r, echo=FALSE}
 #b
 marginalResids <- HLMresid(bees3.lmer7, level = "marginal", standardize = T)
-plot(fitted(bees3.lmer7), marginalResids) #not really any outliers
+plot(fitted(bees3.lmer7), marginalResids, main = "Marginal Residuals vs. Fitted Values", ylab = "Marginal Residuals", "Fitted Values") #not really any outliers
 bees$predictions <- exp(predict(bees3.lmer7, type = "response"))
 #bees[which(marginalResids < -2.5),] #183 210 266 267 445 544
 #bees[which(marginalResids > 3),] # 66 459
@@ -221,19 +223,23 @@ Using the gap criteria, we identified two potentially influential points using C
 ```{r, echo=FALSE}
 #c
 cd <- cooks.distance(bees3.lmer7)
-plot(cd, type= "h")
+plot(cd, type= "h", main = "Cook's Distance Plot", ylab = "Cook's Distance", xlab = "Index")
 
 #dotplot_diag(cd, cutoff = "internal", name = "cooks.distance")
 #bees[which(cd > 0.02),] #260 421
 ```
 
-Plotting the leverage of each point, we see two more points flagged as potentially influential. These two points were not flagged in either of the previous diagnostics nor did they have unusual numbers recorded for their observations.
+Plotting the leverage of each point, we see two more points flagged as potentially influential. These two points were not flagged in either of the previous diagnostics nor did they have unusual numbers recorded for their observations. We also see in the state level leverage plot, South Carolina has by far the highest leverage.South Carolina and 4 other states tend to show up on the leverage plots as high because they are missing some years of data. 
 
 ```{r, echo=FALSE}
 #d
 lev <- leverage(bees3.lmer7, level=1)
-plot(lev[,1])
+lev2 <- leverage(bees3.lmer7, level="state")
+max(lev2[,1])
+plot(lev[,1], main = "Leverage Plot", ylab = "Leverage")
+plot(lev2[,1], main = "Leverage Plot", ylab = "Leverage")
 #dotplot_diag(lev[,1], cutoff = "internal", name = "leverage")
 #547 543
-```
 
+#bees[which(bees$state == "SC"),]
+```

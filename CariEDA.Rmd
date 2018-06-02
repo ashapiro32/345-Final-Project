@@ -597,3 +597,12 @@ logy1.1 <- 0.0046102*(log(2*g))+0.0060765*(y)-0.0026637*y*log(2*g)
 exp(logy1.1)/exp(logy.1)
 #0.9903184
 ```
+
+
+```{r}
+for (i in unique(bees$StateName)){
+  print(i)
+  print(length(which(bees$StateName == i)))
+}
+#5 states without all 18 observations
+```
