@@ -29,13 +29,13 @@ bees3.lmer7 <- lmer(log(totalprod2) ~ log(priceperlb) + yrsince1998 + log(nCLOTH
 ##Introduction
 This case study seeks to examine the effects of neonic pesticides on the production of honey from honey bee colonies in the United States. Compared to other pesticides, neonics (also known as neonicotinoids), are reported to cause less toxicity in birds and mammals than insects. As of 2013, neonics have been used on about 95 percent of corn and canola crops, the majority of cotton, sorghum, and sugar beets, and about half of all soybeans in the US. They are used as seed coatings on most corn and soybean seeds. Neonics are also used on the vast majority of fruit and vegetables, from apples, cherries, peaches, oranges, berries, leafy greens, tomatoes, and potatoes, to cereal grains, rice, nuts, and wine grapes. They were developed in the early 1990s and became widely used across the United States by the early 2000s. Imidacloprid, a specific type of neonic pesticide examined in this study, is currently the most widely used insecticide in the world. 
  
-Neonic pesticides are quite controversial, as they have been linked in a range of studies to adverse ecological effects, including honey-bee colony collapse disorder (CCD) and loss of birds due to a reduction in insect populations. However,  findings on this issue have been conflicting, and thus the pesticides have not yet been directly linked to the decline in the honey bee population. In March 2012, the Center for Food Safety, Pesticide Action Network, Beyond Pesticides and a group of beekeepers filed an emergency petition with the Environmental Protection Agency asking the agency to suspend the use of clothianidin, another type of neonic that was examined in this study, for the sake of protecting the bee populations. The agency denied the petition. In 2013, the European Union and a few non EU countries restricted the use of certain neonicotinoids and in 2018, the EU fully banned the three main neonics (clothianidin, imidacloprid and thiamethoxam, all three of which were examined in this study) for all outdoor uses. Several states in the United States, including Minnesota in 2016, have began to restricted usage of neonicotinoids out of concern for pollinators and bees.
+Neonic pesticides are quite controversial, as they have been linked in a range of studies to adverse ecological effects, including honey-bee colony collapse disorder (CCD) and loss of birds due to a reduction in insect populations. However, findings on this issue have been conflicting, and thus the pesticides have not yet been directly linked to the decline in the honey bee population. In March 2012, the Center for Food Safety, Pesticide Action Network, Beyond Pesticides and a group of beekeepers filed an emergency petition with the Environmental Protection Agency asking the agency to suspend the use of clothianidin, another type of neonic that was examined in this study, for the sake of protecting the bee populations. The agency denied the petition. In 2013, the European Union and a few non EU countries restricted the use of certain neonicotinoids and in 2018, the EU fully banned the three main neonics (clothianidin, imidacloprid and thiamethoxam, all three of which were examined in this study) for all outdoor uses. Several states in the United States, including Minnesota in 2016, have began to restricted usage of neonicotinoids out of concern for pollinators and bees.
 
  
 ##Methods
 The goal of our analysis is to observe changes in honey production, controlling for variation from different states and years, and consider if these changes are associated with pesticide use. The elements of this study are time and the primary sampling units are the individual states. The response variable is the total honey production in each state in each year.
  
-This data is from the US Geological Survey (USGS) and the US Department of Agriculture (USDA), merged by a user on Kaggle. It combines state-level pesticide data with data about honey production and honeybee colonies. This is a longitudinal data set, with information on years 1998 to 2017. However, as there was no pesticide data recorded for 2016 and 2017, we omit these years and thus our data set spreads from 1998 to 2015. Year was transformed to be the number of years into the study, so 1998 became year 0, and so on. The data set did not include Alaska, Delaware, Maryland, Connecticut, New Hampshire, or Massachusetts. Additionally, we omitted the state of Hawaii since it did not report any pesticide levels; this left us with with 43 states to analyze. After this cleaning, our data set consisted of 727 observations and 16 variables. 5 states, South Carolina, Maryland, Oklahoma, Nevada, and New Mexico, were lacking observations from various years; however, this is not concerning for our analysis.
+This data is from the US Geological Survey (USGS) and the US Department of Agriculture (USDA), merged by a user on Kaggle. It combines state-level pesticide data with data about honey production and honeybee colonies. This is a longitudinal data set, with information on years 1998 to 2017. However, as there was no pesticide data recorded for 2016 and 2017, we omit these years and thus our data set spreads from 1998 to 2015. Year was transformed to be the number of years into the study, so 1998 became year 0, and so on. The data set did not include Alaska, Delaware, Maryland, Connecticut, New Hampshire, or Massachusetts. Additionally, we omitted the state of Hawaii since it did not report any pesticide levels; this left us with with 43 states to analyze. After this cleaning, our data set consisted of 727 observations and 16 variables. 5 states - South Carolina, Maryland, Oklahoma, Nevada, and New Mexico - were lacking observations from various years; however, this is not concerning for our analysis.
 
 Variables about honey production include the number of honey-producing colonies, the average honey yield per colony (in pounds), the total production of honey in pounds per state per year (in pounds, divided by 10,000), the honey stocks - a product of honey production - held by producers (in pounds), the average price per pound in each year and state (in dollars), and the production in dollars, which is the total honey production times the price per pound. As many of these variables are highly correlated, we carefully considered which were independent enough to be necessary in our model. We chose to include only the price per pound variable, as this would control for outside market effects.
 	
@@ -55,45 +55,34 @@ colnames(bees2) <- c("Number of Colonies (in 1000s)", "Yield Per Colony (lbs)", 
 df <- summary(bees2)
 nas <- which(is.na(df))
 df[nas] <- ""
-kable(df[,c(1:4)], caption = "Summary Statistics")
-kable(df[,c(5:8)], caption = "Summary Statistics")
-kable(df[,c(9:12)], caption = "Summary Statistics")
+kable(df[,c(1:3)], caption = "Summary Statistics")
+kable(df[,c(4:7)], caption = "Summary Statistics")
+kable(df[,c(8:12)], caption = "Summary Statistics")
 ```
 
-Some trends that we saw in our initial EDA about patterns among states included the following: North Dakota and California tended have the highest number of colonies as well as total production, while Mississippi and Louisiana have most of the top yield per colonies. South Carolina and Kentucky have the lowest numbers of stocks, while South Dakota has the most. The Midwest states tend to have the higest rates of clothianidin use, while California tends to use the most imidacloprid, followed by Midwest states. The Midwest and Texas use the most thiamethoxam, and California uses the most acetamiprid by far. New York and Washington have the highest thiacloprid usage. Finally, overall, the Midwest states have the highest total use of neonics.
+Some trends that we saw in our initial EDA about patterns among states included the following: North Dakota and California tended have the highest number of colonies as well as total production, while Mississippi and Louisiana have most of the top yield per colony values. South Carolina and Kentucky have the lowest numbers of stocks, while South Dakota has the most. The Midwest states tend to have the higest rates of clothianidin use, while California tends to use the most imidacloprid, followed by Midwest states. The Midwest and Texas use the most thiamethoxam, and California uses the most acetamiprid by far. New York and Washington have the highest thiacloprid usage. Finally, overall, the Midwest states have the highest total use of neonics.
 
 Through modeling, we found the following covariates to be significant in predicting the log of the total production: log of price per pound, year since the study began, log of the weight of clothianidin used, log of of the weight of acetamiprid used, an interaction term between the log of price per pound and year, and an interaction between the log of acetamiprid and the log of clothianidin.
-
-```{r, echo = FALSE, fig.align="center", fig.height=4, fig.width=6}
-par(mfrow = c(2,3))
-hist(bees$priceperlb, main = "", xlab = "Price", ylab="")
-hist(bees$nCLOTHIANIDIN, main = "Histograms of Variables", xlab = "Clothianidid", ylab="", cex.main = .9)
-hist(bees$nACETAMIPRID, main = "", xlab = "Acetamiprid", ylab="")
-
-hist(log(bees$priceperlb), main = "", xlab = "Price", ylab="")
-hist(log(bees$nCLOTHIANIDIN), main = "Histograms of Logged Variables", xlab = "log(Clothianidid)", ylab="", cex.main = .9)
-hist(log(bees$nACETAMIPRID), main = "", xlab = "log(Acetamiprid)", ylab="")
-```
 
 Additionally, a random intercept was added for state and a random slope was added for year to account for variance from those two factors. 97.5% of the variation in the model comes from the state level in the first year of the study, 0.0005% of the variation comes from rates of change in the total production over the 17 year observation period, and 2.5% of the variation comes from within state deviations. Despite such little variation coming from time, a p-value of 0 confirms that the random effect for time is still necessary.
 
 ```{r, fig.height=3.5, fig.width=7, echo=FALSE}
 bees$nACETAMIPRIDFACTOR <- cut_number(bees$nACETAMIPRID, 4)
 
-plot4 <- ggplot(bees) + geom_point(aes(x=log(nCLOTHIANIDIN),y=log(totalprod), color = nACETAMIPRIDFACTOR))+geom_smooth(aes(x=log(nCLOTHIANIDIN),y=log(totalprod), color = nACETAMIPRIDFACTOR), method = "nls", formula = y ~ a * x + b, se = FALSE, method.args = list(start = list(a = 0.1, b = 0.1))) + labs(color="log(Acetamiprid Levels)", title = "Clothianidid levels vs. Honey Production Levels by Acetamiprid Levels", x = "log(Clothianidid Levels)", y="log(Total Production)")  
+plot4 <- ggplot(bees) + geom_point(aes(x=log(nCLOTHIANIDIN),y=log(totalprod), color = nACETAMIPRIDFACTOR))+geom_smooth(aes(x=log(nCLOTHIANIDIN),y=log(totalprod), color = nACETAMIPRIDFACTOR), method = "nls", formula = y ~ a * x + b, se = FALSE, method.args = list(start = list(a = 0.1, b = 0.1))) + labs(color="log(Acetamiprid Levels)", title = "Figure 1. Clothianidid levels vs. Honey Production Levels by Acetamiprid Levels", x = "log(Clothianidid Levels)", y="log(Total Production)")  
 plot4
 ```
 
-Here we see the interaction between acetamiprid and clothianidid. Because we see different slopes among groups of acetamiprid levels when plotting clothianidid levels against the log of total production, we suspect an interaction between clothianidid and acetamiprid.
+In Figure 1, we see the interaction between acetamiprid and clothianidid. Because we see different slopes among groups of acetamiprid levels when plotting clothianidid levels against the log of total production, we suspect an interaction between clothianidid and acetamiprid.
 
 ```{r, fig.height=3.5, fig.width=7, echo=FALSE}
 bees$pplbFACTOR <- cut_number(bees$priceperlb, 4)
 
-plot5 <- ggplot(bees) + geom_point(aes(x=yrsince1998 ,y=log(totalprod), color = pplbFACTOR))+geom_smooth(aes(x=yrsince1998, y=log(totalprod), color = pplbFACTOR), method = "nls", formula = y ~ a * x + b, se = FALSE, method.args = list(start = list(a = 0.1, b = 0.1))) + labs(color="log(Price Per lb)", title = "Year vs. Honey Production Levels by Price Per Pound", x = "Year Since 1998", y="log(Total Production)") 
+plot5 <- ggplot(bees) + geom_point(aes(x=yrsince1998 ,y=log(totalprod), color = pplbFACTOR))+geom_smooth(aes(x=yrsince1998, y=log(totalprod), color = pplbFACTOR), method = "nls", formula = y ~ a * x + b, se = FALSE, method.args = list(start = list(a = 0.1, b = 0.1))) + labs(color="log(Price Per lb)", title = "Figure 2. Year vs. Honey Production Levels by Price Per Pound", x = "Year Since 1998", y="log(Total Production)") 
 plot5
 ```
 
-We also see a potential interaction between price per pound of honey and the number of years since 1998. We see that the slopes of best fit lines for the four categories of price per pound we created differ when plotted against the log of total honey production, especially at the low prices. When creating our model, we included these interactions as well as others suggested by EDA, although the two shown above were the only two that proved to be significant. Below is our final model.
+In Figure 2, we also see a potential interaction between price per pound of honey and the number of years since 1998. We see that the slopes of best fit lines for the four categories of price per pound we created differ when plotted against the log of total honey production, especially at the low prices. When creating our model, we included these interactions as well as others suggested by EDA, although the two shown above were the only two that proved to be significant. Below is our final model.
 
 We have a two-level model with state $i$ and year $j$:
 
@@ -191,50 +180,38 @@ https://en.wikipedia.org/wiki/Neonicotinoid#cite_note-10
 
 \newpage 
 #Appendix
+As mentioned above, we took the log of each chemical and other variables, as well as added 1 to each 0 obeservation to make it possible to do so. Below are histograms illustrating these transformations. 
+ 
+```{r, echo = FALSE, fig.align="center", fig.height=4, fig.width=6}
+par(mfrow = c(2,3))
+hist(bees$priceperlb, main = "", xlab = "Price", ylab="")
+hist(bees$nCLOTHIANIDIN, main = "Histograms of Variables", xlab = "Clothianidid", ylab="", cex.main = .9)
+hist(bees$nACETAMIPRID, main = "", xlab = "Acetamiprid", ylab="")
+
+hist(log(bees$priceperlb), main = "", xlab = "Price", ylab="")
+hist(log(bees$nCLOTHIANIDIN), main = "Histograms of Logged Variables", xlab = "log(Clothianidid)", ylab="", cex.main = .9)
+hist(log(bees$nACETAMIPRID), main = "", xlab = "log(Acetamiprid)", ylab="")
+```
+
+We can see that while logging the variables did make them less skewed and more normal in the mid-range values, we have huge numbers of zeros for each chemical. This is potentially an issue in our model building, and there perhaps may be a model out there that could better account for the high number of zero observations, as well as the very wide range in the weight of chemicals used.
+
 Diagnostic plots showed some potential outliers or influential points in our model. However, as no observation was repeatedly flagged in more than one diagnostic and none of the points flagged had any clear relation to each other, we kept them in the model as our data set is already not very large. 
 
-The conditional residuals suggest constant variance. Although the variance is slightly less with larger fitted values, we suspect this is due in part to having fewer observations with larger fitted values. 
-
-```{r, echo=FALSE, fig.align='center', fig.height=3, fig.width=4}
-conditionalResids<-HLMresid(bees3.lmer7, level = 1, standardize = T)
-plot(fitted(bees3.lmer7), conditionalResids, main = "Conditional Residuals vs. Fitted Values", ylab = "Conditional Residuals", xlab = "Fitted Values")
-abline(h=0)
-#pretty constant variance
-```
-
- 
-The marginal residuals show a few outliers. The largest outliers are seen for the smaller fitted values. These outliers are negative, suggesting that our model has potential to over predict for smaller fitted values. We investigated all points with residuals greater than and less than 3 and, as stated earlier, no commonalities were apparent among these points.
-
-
-```{r, echo=FALSE, fig.align='center', fig.height=3, fig.width=4}
-#b
-marginalResids <- HLMresid(bees3.lmer7, level = "marginal", standardize = T)
-plot(fitted(bees3.lmer7), marginalResids, main = "Marginal Residuals vs. Fitted Values", ylab = "Marginal Residuals", xlab = "Fitted Values") #not really any outliers
-bees$predictions <- exp(predict(bees3.lmer7, type = "response"))
-#bees[which(marginalResids < -2.5),] #183 210 266 267 445 544
-#bees[which(marginalResids > 3),] # 66 459
-```
-
-Using the gap criteria, we identified two potentially influential points using Cook’s distance. Upon further examination of the values recorded for these observations, neither of these points appeared particularly concerning as well. 
-
-```{r, echo=FALSE, fig.align='center', fig.height=3, fig.width=4}
-#c
-cd <- cooks.distance(bees3.lmer7)
-plot(cd, type= "h", main = "Cook's Distance Plot", ylab = "Cook's Distance", xlab = "Index")
-
-#dotplot_diag(cd, cutoff = "internal", name = "cooks.distance")
-#bees[which(cd > 0.02),] #260 421
-```
-
-Plotting the leverage of each point, we see two more points flagged as potentially influential. These two points were not flagged in either of the previous diagnostics nor did they have unusual numbers recorded for their observations. We also see in the state level leverage plot, South Carolina and 4 other states tend to show up on the leverage plots as high, likely because they are missing some years of data. 
+Plotting the leverage of each point, we see two more points flagged as potentially influential. These two points were not flagged in either of the previous diagnostics nor did they have unusual numbers recorded for their observations.
 
 ```{r, echo=FALSE, fig.align='center', fig.height=3, fig.width=4}
 #d
 lev <- leverage(bees3.lmer7, level=1)
 lev2 <- leverage(bees3.lmer7, level="state")
 
-plot(lev[,1], main = "Leverage Plot", ylab = "Leverage")
-plot(lev2[,1], main = "Leverage Plot", ylab = "Leverage")
+plot(lev[,1], main = "Leverage Plot", ylab = "Leverage", xlab = "Index")
+```
+
+Interestingly, we also see in the state level leverage plot, South Carolina and 4 other states tend to show up on the leverage plots as high, likely because they are missing some years of data as mentioned earlier. 
+
+```{r, echo=FALSE, fig.align='center', fig.height=3, fig.width=4}
+#d
+plot(lev2[,1], main = "Leverage Plot - State Level", ylab = "Leverage", xlab = "Index")
 #dotplot_diag(lev[,1], cutoff = "internal", name = "leverage")
 #547 543
 
