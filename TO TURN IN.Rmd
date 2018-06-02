@@ -30,7 +30,7 @@ for (i in 1:727){
 }
 
 #scale stocks
-bees$stocks <- bees$stocks/1000
+bees$totalprod2 <- bees$totalprod/1000
 #scale year
 bees <- bees %>% mutate(yrsince1998 = year - 1998)
 
@@ -46,11 +46,16 @@ hist(bees$stocks)
 hist(bees$priceperlb)
 hist(bees$yieldpercol) #fine
 hist(bees$nCLOTHIANIDIN)
+hist(log(bees$nCLOTHIANIDIN))
+
+range(log(bees$nCLOTHIANIDIN))
 hist(bees$nIMIDACLOPRID)
 range(log(bees$nIMIDACLOPRID))
 hist(bees$nTHIAMETHOXAM)
 range(log(bees$nTHIAMETHOXAM))
 hist(bees$nACETAMIPRID)
+hist(log(bees$nACETAMIPRID))
+
 range(log(bees$nACETAMIPRID))
 hist(bees$nTHIACLOPRID)
 range(log(bees$nTHIACLOPRID))
@@ -193,6 +198,7 @@ D <- 2*(L1-L0)
 ```
 
 ```{r}
+library(lme4)
 #start with model with all pairwise interactions between suggested significant covariates
 #chose pairwise because most seemed like they had interactions
 bees.lmer <- lmer(log(totalprod2) ~ (log(priceperlb) + yrsince1998 + log(nCLOTHIANIDIN) + log(nIMIDACLOPRID) + log(nTHIAMETHOXAM) + log(nACETAMIPRID) + log(nTHIACLOPRID))^2 + (yrsince1998|state), data = bees) #chose to examine all 
@@ -261,21 +267,22 @@ anova(bees.lmer7.1,bees.lmer6.1) #prefer the smaller model, no more with t-value
 
 #check model
 ```{r}
+library(HLMdiag)
 conditionalResids<-HLMresid(bees.lmer7, level = 1, standardize = T)
-plot(fitted(bees.lmer7), conditionalResids)
+plot(fitted(bees.lmer7), conditionalResids, main = "Conditional Residuals vs Fitted Values", xlab = "Fitted", ylab="Conditional Residuals")
 abline(h=0)
 #pretty constant variance
 
 
 #b
 marginalResids <- HLMresid(bees.lmer7, level = "marginal", standardize = T)
-plot(fitted(bees.lmer7), marginalResids) #not really any outliers
+plot(fitted(bees.lmer7), marginalResids, main = "Marginal Residuals vs Fitted Values", xlab = "Fitted", ylab="Marginal Residuals") #not really any outliers
 bees[which(marginalResids < -2.5),] #183 210 266 267 445 544
 bees[which(marginalResids > 3),] # 66 459
 
 #c
 cd <- cooks.distance(bees.lmer7)
-plot(cd, type= "h")
+plot(cd, type= "h", main = "Cook's Distance Plot", ylab = "Cook's Distance")
 
 dotplot_diag(cd, cutoff = "internal", name = "cooks.distance")
 bees[which(cd > 0.02),] #260 421
