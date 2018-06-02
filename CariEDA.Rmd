@@ -260,10 +260,9 @@ anova(bees2.lmer8.1,bees2.lmer9.1)
 summary(bees.lmerREM2)
 
 bees.lmerREM3 <- update(bees.lmerREM2,. ~ . -(log(nCLOTHIANIDIN):log(nIMIDACLOPRID) + log(nIMIDACLOPRID)))
-=======
-summary(bees.lmerFINAL)
->>>>>>> faa61da93014331c9ec940ca40097fc56f63c628
 ```
+summary(bees.lmerFINAL)
+
 
 ```{r}
 predictions <- predict(bees.lmerFINAL, type="response")
@@ -516,6 +515,10 @@ anova(bees3.lmer5.1,bees3.lmer6.1) #prefer the smaller model
 bees3.lmer7 <- update(bees3.lmer6,. ~ . -(log(nCLOTHIANIDIN):log(nTHIAMETHOXAM) + log(nTHIAMETHOXAM) +log(nIMIDACLOPRID)))
 summary(bees3.lmer7, cor = FALSE) #final
 
+bees3.lmer7 <- lmer(log(totalprod2) ~ log(priceperlb) + yrsince1998 + log(nCLOTHIANIDIN) +  
+    log(nACETAMIPRID) + (yrsince1998 | state) + log(priceperlb):yrsince1998 +  
+    log(nCLOTHIANIDIN):log(nACETAMIPRID), data = bees)
+
 bees3.lmer7.1 <- update(bees3.lmer7, REML=F)
 
 anova(bees3.lmer7.1,bees3.lmer6.1) #prefer the smaller model
@@ -526,6 +529,17 @@ anova(bees3.lmer7.1,bees3.lmer6.1) #prefer the smaller model
 #price per lb in a given year
 x <- c(seq(0,17,by=1))
 2^(-.18)*2^(.016*x)
+
+#confidence intervals
+#get the SE of the estimate
+#holding year constant, so use interaction and pplb coef
+vcov(bees3.lmer7)
+
+0.84485  (1.975189)0.052227
+se1 <- sqrt(0.0562002^2+0.0009482^2+2*(1)*(-1)*(-1.295769e-04))
+1-(2^(-0.296)*2^(0.0067*x))
+
+1-(2^(-0.0746)*2^(0.0256*x))
 ```
 
 
@@ -554,4 +568,32 @@ lev <- leverage(bees3.lmer7, level=1)
 dotplot_diag(lev[,1], cutoff = "internal", name = "leverage")
 #547 543
 ```
->>>>>>> faa61da93014331c9ec940ca40097fc56f63c628
+
+```{r}
+confint(bees3.lmer7)
+```
+
+```{r}
+#interpret pesticide coefficient
+#log(nCLOTHIANIDIN) 0.0046102
+#log(nACETAMIPRID) 0.0060765
+#log(nCLOTHIANIDIN):log(nACETAMIPRID) -0.0026637
+#log(y) = 0.0046102*log(cloth)+0.0060765*(log(acet))-0.0026637*log(cloth)*log(acet)
+#set cloth=9 and double acet
+g <- 1 #doesn't matter what this is
+x <- 9 #most common value
+logy <- 0.0046102*(x)+0.0060765*(log(g))-0.0026637*x*log(g)
+logy1 <- 0.0046102*(x)+0.0060765*(log(2*g))-0.0026637*x*log(2*g)
+
+exp(logy1)/exp(logy)
+#0.9876715
+
+
+#set acet=y and double cloth
+y <- 7 #most common value of acet
+logy.1 <- 0.0046102*(log(g))+0.0060765*(y)-0.0026637*y*log(g)
+logy1.1 <- 0.0046102*(log(2*g))+0.0060765*(y)-0.0026637*y*log(2*g)
+
+exp(logy1.1)/exp(logy.1)
+#0.9903184
+```
