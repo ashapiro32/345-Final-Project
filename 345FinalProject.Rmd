@@ -41,7 +41,7 @@ Variables about honey production include the number of honey-producing colonies,
 	
 The  data set also includes pesticide data for 5 different neonic pesticides. Each pesticide is recorded as the amount in kilograms used each year in each state. The pesticides investigated in this study are clothianidin, imidacloprid, thiamethoxam, acetamiprid, and thiacloprid applied at each location and time. An additional variable of the sum of all 5 of the pesticides used per year per state was also provided. As this variable is clearly correlated with others and we wanted to see if specific pesticides were associated with honey production, it was not included in analysis. For each pesticide, we noted a high amount of 0’s reported. This is because until 2003, pesticides of this type were less commonly used, and each state did not use every of pesticide examined in this study, depending on what its major crops were. 
  
-As all variables but year were heavily right skewed, log transformations were taken for all predictors (except for year). Because all pesticides had a high number of 0’s, we added 1 to each of these observations so that it still remained 0 after we took the log. See appendix for further discussion of this.  
+As all variables but year were heavily right skewed, log transformations were taken for all predictors (except for year). Because all pesticides had a high number of 0’s, we added 1 to each of these observations so that it still remained 0 after we took the log. See the appendix for further discussion of this.  
 
  
 ##Results
@@ -64,7 +64,7 @@ The following are some trends we observed within our exploratory data analysis. 
 
 Through modeling, we found the following covariates to be significant in predicting the log of the total production: log of price per pound, year since the study began, log of the weight of clothianidin used, log of of the weight of acetamiprid used, an interaction term between the log of price per pound and year, and an interaction between the log of acetamiprid and the log of clothianidin.
 
-Additionally, a random intercept was added for state and a random slope was added for year to account for variance from those two factors. 97.5% of the variation in the model comes from the state level in the first year of the study, 0.0005% of the variation comes from rates of change in the total production over the 17 year observation period, and 2.5% of the variation comes from within state deviations. Despite such little variation coming from time, a p-value of 0 confirms that the random effect for time is still necessary.
+Additionally, a random intercept was added for state and a random slope was added for year to account for variance from those two factors. 97.5% of the variation in the model comes from the state level in the first year of the study, 0.0005% of the variation comes from rates of change in the total production over the 17 year observation period, and 2.5% of the variation comes from within-state deviations. Despite such little variation coming from time, a p-value of 0 confirms that the random effect for time is still necessary.
 
 In Figure 1, we see the interaction between acetamiprid and clothianidid. Because we see different slopes among groups of acetamiprid levels when plotting clothianidid levels against the log of total production, we suspect an interaction between clothianidid and acetamiprid.
 
@@ -152,7 +152,7 @@ Our estimates for the variance components:
 
 Finally, our estimate for the correlation of the random effects is $\rho =  .12$.
 
-Interestingly, we didn’t find that most of the neonic chemicals were significant in our model. We saw a significant interaction between kilograms of clothianidin and acetamiprid, although neither chemical on its own proved significant. This is seen in the confidence intervals for each coefficient. The confidence interval for both log(clothianidin) and log(acetamiprid) contain 0; however, their interaction has a negative effect on the log of total production of honey. 
+Interestingly, we found that most of the neonic chemicals were not significant in our model. We saw a significant interaction between kilograms of clothianidin and acetamiprid, although neither chemical on its own proved significant. This is seen in the confidence intervals for each coefficient. The confidence interval for both log(clothianidin) and log(acetamiprid) contain 0; however, their interaction has a negative effect on the log of total production of honey. 
 
 Individually, year since 1998 and price per pound both have negative coefficients, suggesting that an increase in either one results in a decrease in the total production of honey, but their interaction has a positive coefficient. This makes it difficult to interpret the the effect of each covariate generally for the model. However, in fixing one at a specific number we can see how the other would affect the total production of honey. 
 
@@ -164,15 +164,15 @@ It should be noted that when diagnostics were checked, a few minor outliers and 
  
 
 ##Discussion
-This study finds the following to be significant in predicting the total production of honey after accounting for variance from time and different states: year, price per pound of honey, and interactions between year and price and the amount of acetamiprid and clothianidin used. We set out to determine the effects of neonic pesticides on total honey production, but our analysis points to price per pound and year as being more important factors. It is not entirely surprising that our results do not provide a clear answer to our question, as earlier studies have also found conflicting results.
+This study finds the following to be significant in predicting the total production of honey after accounting for variance from time and different states: year, price per pound of honey, and interactions between year and price and the amount of acetamiprid and clothianidin used. We set out to determine the effects of neonic pesticides on total honey production, but our analysis points to price per pound and year as being more important factors. It is not entirely surprising that our results do not provide a clear answer to our question, as earlier studies have also found conflicting results. Future research might focus on using different models for each state, since the effects of pesticides could differ based on which state they are used in.
 
 Although price per pound is not a factor directly linked to the production of honey, it is indicative of the amount of honey being produced at any given time. As the principle of supply and demand suggests, when there are limited goods to be sold, their price increases. When there is less honey, we would expect the price to increase. Thus, price makes sense as a predictor of levels of honey production.
 
-There is one limitation to this study. It is well-known that climate change, particularly the rising global temperatures, are related to the decline in bee populations in the past two decades. Declining bee populations would lead to a decline in the total production of honey. This study examined only bee colony levels in relation to neonic pesticide use, not accounting for these climate factors. Further research done controlling for these other variables would be a necessary next step in fully understanding the effects of these pesticides on the numbers of bees and the amount of honey being produced. A potentially interesting approach could be to compare the numbers of honeybees between countries that support the use of neonics and those that do not
+There is one limitation to this study. It is well-known that climate change, particularly the rising global temperatures, are related to the decline in bee populations in the past two decades. Declining bee populations would lead to a decline in the total production of honey. This study examined only bee colony levels in relation to neonic pesticide use, not accounting for these climate factors. Further research done controlling for these other variables would be a necessary next step in fully understanding the effects of these pesticides on the numbers of bees and the amount of honey being produced. A potentially interesting approach could be to compare the numbers of honeybees between countries that support the use of neonics and those that do not. 
 
-
-\newpage
 ###References
+https://www.kaggle.com/kevinzmith/honey-with-neonic-pesticide
+
 https://www.npr.org/sections/thesalt/2016/08/31/491962115/minnesota-
 cracks-down-on-neonic-pesticides-promising-aid-to-bees
 
