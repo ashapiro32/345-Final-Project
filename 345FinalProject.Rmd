@@ -88,7 +88,7 @@ Below is our final model. We use a two-level model with state $i$ and year $j$:
 
 Level 1:
 $$\log(TotalProduction_{ij}) = a_i + b_iyrsince1998_{ij} + \gamma\log(priceperlb_{ij}) + \delta\log(clothianidin_{ij}) + $$ 
-$$\lambda\log(acetamiprid_{ij}) + \eta\log(clothianidin_{ij})\log(acetamiprid_{ij}) + \theta\log(priceperlb_{ij})yrssince1998_{ij} + \epsilon_{ij}$$
+$$\lambda\log(acetamiprid_{ij}) + \eta\log(clothianidin_{ij})\log(acetamiprid_{ij}) + \theta\log(priceperlb_{ij})yrsince1998_{ij} + \epsilon_{ij}$$
 
 Level 2:
 \begin{align*}
@@ -98,7 +98,7 @@ b_i &= \beta + v_i
 
 Composite:
 $$\log(TotalProduction_{ij}) = \alpha + \beta yrsince1998_{ij} + \gamma\log(priceperlb_{ij}) + \delta\log(clothianidin_{ij}) + \lambda\log(acetamiprid_{ij}) + $$
-$$\eta\log(clothianidin_{ij})\log(acetamiprid_{ij}) + \theta\log(priceperlb_{ij})yrssince1998_{ij} +u_i + v_iyrsince1998_{ij} + \epsilon_{ij}$$
+$$\eta\log(clothianidin_{ij})\log(acetamiprid_{ij}) + \theta\log(priceperlb_{ij})yrsince1998_{ij} +u_i + v_iyrsince1998_{ij} + \epsilon_{ij}$$
 
 Where $\epsilon \sim N(0, \sigma)$ and $$\begin{bmatrix}
     u_{i}\\
